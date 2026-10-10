@@ -8,7 +8,7 @@ RUN mkdir -p /opt/reference/source \
     && cd /opt/reference/source \
     && go mod download \
     && go test -run '^$' ./cmd/prometheus ./scrape/...
-COPY test.sh controller.go hidden_pool_identity_test.go /tests/
+COPY test.sh controller.go hidden_pool_identity_test.go hidden_client_retirement_test.go /tests/
 COPY common/ /tests/common/
 RUN groupadd --gid 65532 micro1verifier \
     && useradd --uid 65532 --gid 65532 --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin micro1verifier \

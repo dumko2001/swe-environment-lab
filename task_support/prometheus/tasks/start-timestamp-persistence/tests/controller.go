@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
@@ -19,8 +20,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/prometheus/model/histogram"
+	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/model/value"
+	"github.com/prometheus/prometheus/tsdb"
+	"github.com/prometheus/prometheus/tsdb/chunkenc"
 	"github.com/prometheus/prometheus/tsdb/tsdbutil"
 )
 
@@ -654,22 +659,6 @@ func expectedSample(floatMode bool, st, timestamp, n int64, profile, ordinal int
 	return result
 }
 
-func discoverOption(candidate, candidateReader string, st, base, count int64) int {
-	want := expectedSample(false, st, base, count, 0, 0)
-	for index := 0; index < 128; index++ {
-		samples, err := tryRun(candidate, candidateReader, "", "probe", false, true, st, base, count, index, 0)
-		if err != nil {
-			continue
-		}
-		for _, got := range samples.Samples {
-			if reflect.DeepEqual(got, want) {
-				return index
-			}
-		}
-	}
-	panic("no independently effective histogram start-timestamp option")
-}
-
 func expectedInOrder(floatMode, legacy bool, st, base, count int64, profile int) []sample {
 	result := make([]sample, 0, lifecycleSamples)
 	for ordinal := 0; ordinal < lifecycleSamples; ordinal++ {
@@ -820,6 +809,97 @@ func requireFeatureState(features map[string]map[string]bool, histogramST, xor2 
 	}
 }
 
+// Inspect actual durable float chunks with the trusted parent reader. A feature
+// registry response alone cannot establish independence of storage behavior.
+func checkFloatEncodingBlocks(path, sandbox, metric string, base, count int64, xor2 bool) {
+	if err := os.MkdirAll(sandbox, 0700); err != nil {
+		panic(err)
+	}
+	db, err := tsdb.OpenDBReadOnly(path, sandbox, promslog.NewNopLogger())
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	q, err := db.ChunkQuerier(base, base+3)
+	if err != nil {
+		panic(err)
+	}
+	defer q.Close()
+	set := q.Select(context.Background(), false, nil, labels.MustNewMatcher(labels.MatchEqual, "__name__", metric))
+	expectedEncoding := chunkenc.EncXOR
+	if xor2 {
+		expectedEncoding = chunkenc.EncXOR2
+	}
+	seriesCount, sampleCount := 0, int64(0)
+	for set.Next() {
+		seriesCount++
+		it := set.At().Iterator(nil)
+		for it.Next() {
+			chunk := it.At().Chunk
+			if chunk.Encoding() != expectedEncoding {
+				panic(fmt.Sprintf("float encoding changed with histogram flag: got %s want %s", chunk.Encoding(), expectedEncoding))
+			}
+			samples := chunk.Iterator(nil)
+			for valueType := samples.Next(); valueType != chunkenc.ValNone; valueType = samples.Next() {
+				if valueType != chunkenc.ValFloat {
+					panic("float encoding probe returned non-float sample")
+				}
+				t, value := samples.At()
+				if t != base+sampleCount || value != float64(count+sampleCount) {
+					panic("float encoding probe changed sample contents")
+				}
+				sampleCount++
+			}
+			if err := samples.Err(); err != nil {
+				panic(err)
+			}
+		}
+		if err := it.Err(); err != nil {
+			panic(err)
+		}
+	}
+	if err := set.Err(); err != nil {
+		panic(err)
+	}
+	if seriesCount != 1 || sampleCount != 4 {
+		panic("float encoding probe lost samples")
+	}
+}
+
+func requireFloatEncoding(candidate string, histogramEncoding, xor2 bool, base, count int64) {
+	defer stopCandidateProcesses()
+	root, err := os.MkdirTemp("/tmp/micro1-verifier-tmp", "float-codec-")
+	if err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(root)
+	if err := os.Chown(root, 65532, 65532); err != nil {
+		panic(err)
+	}
+	dir, metric := root+"/db", "float_"+token()
+	mode := "float-encoding-disabled"
+	if histogramEncoding {
+		mode = "float-encoding-enabled"
+	}
+	launcher := os.Getenv("MICRO1_CANDIDATE_LAUNCHER")
+	output, err := exec.Command(launcher, candidate, "/tmp/micro1-verifier-tmp", mode, dir, metric, "0", fmt.Sprint(base), fmt.Sprint(count), "false", fmt.Sprint(xor2), "0", "0").CombinedOutput()
+	stopCandidateProcesses()
+	if err != nil {
+		panic(fmt.Sprintf("float encoding writer failed: %v: %s", err, output))
+	}
+	projection := root + "/blocks-only"
+	if err := projectBlocks(dir, projection); err != nil {
+		panic(err)
+	}
+	if err := sealReadOnly(projection); err != nil {
+		panic(err)
+	}
+	if err := os.RemoveAll(dir); err != nil {
+		panic(err)
+	}
+	checkFloatEncodingBlocks(projection, root+"/reader", metric, base, count, xor2)
+}
+
 func main() {
 	if len(os.Args) != 6 {
 		panic("invalid arguments")
@@ -827,7 +907,7 @@ func main() {
 	st := int64(1000 + int(token()[0]))
 	base := int64(10020 + int(token()[1])%20)
 	count := int64(140 + int(token()[2])%20)
-	optionIndex := discoverOption(os.Args[1], os.Args[2], st, base, count)
+	optionIndex := 0 // Reserved positional argument; public feature parsing configures storage.
 	for _, floatMode := range []bool{false, true} {
 		reset := run(os.Args[1], os.Args[2], os.Args[4], "reset", floatMode, true, st, base, count, optionIndex, 0)
 		requireResult(reset, expectedReset(floatMode, st, base, count), true, base+1)
@@ -855,4 +935,10 @@ func main() {
 	requireFeatureState(runFeatureCase(os.Args[5], []string{"histograms-st-encoding"}), true, false)
 	requireFeatureState(runFeatureCase(os.Args[5], []string{"xor2-encoding"}), false, true)
 	requireFeatureState(runFeatureCase(os.Args[5], []string{"histograms-st-encoding", "xor2-encoding"}), true, true)
+	for _, histogramEncoding := range []bool{false, true} {
+		for _, xor2 := range []bool{false, true} {
+			requireFloatEncoding(os.Args[1], histogramEncoding, xor2, base, count)
+		}
+	}
+
 }

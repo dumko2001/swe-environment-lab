@@ -18,7 +18,7 @@ RUN mkdir -p /opt/reference/source \
     && GOWORK=off GOFLAGS=-mod=mod go test -run '^$' ./tsdb/chunkenc ./tsdb \
     && find /opt/oracle -type d -exec chmod 0700 {} + \
     && find /opt/oracle -type f -exec chmod 0600 {} +
-COPY test.sh candidate_program.go candidate_reader.go legacy_writer.go controller.go /tests/
+COPY test.sh candidate_program.go candidate_reader.go oracle_reader.go feature_bridge.go build-storage-probe.sh legacy_writer.go controller.go /tests/
 COPY common/ /tests/common/
 RUN groupadd --gid 65532 micro1verifier \
     && useradd --uid 65532 --gid 65532 --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin micro1verifier \

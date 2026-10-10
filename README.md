@@ -1,105 +1,62 @@
-# Prometheus RL environment
+# swe-environment-lab
 
-Prometheus changes span networking, query execution, and storage. This repository turns five merged changes into one RL environment that runs through Harbor on Daytona.
+Seven PR-derived software-engineering tasks from **Prometheus, Thanos and VictoriaMetrics**, built to evaluate coding agents against running systems. Each task starts from a pinned repository snapshot and provides a working development environment, a maintainer-style request and a separate behavioral verifier.
 
-Teams training or comparing coding agents need to package a repository change as a repeatable episode without giving away the answer. Each task here has a pinned starting tree, a short maintainer request, a captured trajectory, and a binary reward. The runtime stays the same as the work moves across the codebase.
+I built this with an AI coding agent. I set the requirements, challenged its conclusions and directed the reviews; the agent implemented the environments and graders, ran calibration, and inspected the submitted solutions. The main question I kept pushing on was whether we were measuring the engineering work the original change required, or just whether a patch could pass the tests we had written.
 
-The seven upstream PRs were merged between 18 May and 14 August 2026. Choosing recent changes reduces the chance of training exposure; it does not prove that a model has never seen the code.
+## What I wanted the evaluation to capture
 
-## The five tasks
+I wanted each task to include a live deployment the agent could interact with. That would let it reproduce the problem, change the code and observe the effect in a running system. The environment needed to support that engineering workflow, including failures that only appear when services interact or state survives a restart.
 
-| Task | Upstream PRs | Outcome |
+That requirement led to a full Thanos query path with Prometheus, Sidecar, Query, Query Frontend and Memcached. For storage tasks, the agent added drivers that exercise actual checkpoints, replay and block reopen. A successful HTTP response cannot tell us whether a histogram's start timestamp survives a restart. Controlled inputs help reproduce those cases; the storage and query components themselves need to be real.
+
+I also wanted the request to sound like a teammate asking a senior engineer to do the work. Reading [Snorkel's Senior SWE-Bench methodology](https://senior-swe-bench.snorkel.ai/blog/2026-06-16-how-it-works) helped me articulate that: give the agent the problem and intended behavior, then leave room for it to investigate the codebase and choose a design. I asked for obvious setup directions and evaluation boilerplate to be removed from the prompts.
+
+That did not mean leaving the acceptance criteria ambiguous. The agent's shortening dropped standalone subqueries and entirely missing series from two requests, even though the graders expected them. Those requirements went back in before the affected tasks were rerun. The distinction I wanted was between details an engineer can discover in the repository and requirements they would otherwise have to guess.
+
+## Why a passing solution needed another look
+
+I wanted to know whether a passing patch covered the engineering concerns behind the upstream change. When the agent described three passing Unix-socket solutions as “differing implementations,” I asked what actually differed: what had the PR author accounted for, what had the alternatives missed, and could an alternative be better?
+
+That question changed the review from comparing scores to comparing behavior. Local diagnostic replays found that all three solutions overrode a caller-supplied dial option and retained removed clients. The agent added checks for those omissions without requiring the upstream client's internal organization. A repaired alternative kept its design and passed the targeted compatibility check. Different code was not sufficient reason to reject it; broken compatibility was.
+
+The same comparison also found a limit in the reference. One earlier-cohort WAL alternative handled a repeated-restart boundary better but retained stale metadata longer. Because the reference itself failed that restart case, we did not add it as a grading gate. The experiment established a tradeoff, not a universally better implementation.
+
+I asked for the graders themselves to be checked because a low solve rate could otherwise reflect mistakes in the evaluation. Thanos made that concern concrete. An earlier passing solution fetched compatible cache keys sequentially, missing a batching concern discussed upstream. The agent's first probe counted keys rather than remote commands and rejected the reference. That measurement had to be corrected before it could say anything useful about a candidate.
+
+A later passing Thanos submission omitted a lone final timestamp. The agent added float and histogram cases, checked them against the reference, unchanged code and archived submission, then ran fresh attempts. We kept results attached to the verifier version that produced them. Otherwise, tightening a grader could look like a change in model ability when the measurement had changed.
+
+## What the final runs showed
+
+The final selection contains two GPT-6 Luna attempts per task: **1/14 passed**. That is a small calibration sample, not a model ranking or proof that low solve rate means high task quality. The packages changed during review; superseded runs are excluded from this selection.
+
+| Task | Source PRs | Final trajectory findings |
 |---|---|---|
-| Unix-socket scraping | [#18091](https://github.com/prometheus/prometheus/pull/18091), [#19399](https://github.com/prometheus/prometheus/pull/19399) | Scrape HTTP and HTTPS targets over Unix sockets without mixing targets or falling back to TCP |
-| Step-invariant PromQL | [#19187](https://github.com/prometheus/prometheus/pull/19187) | Keep fixed-time subqueries consistent across instant and range evaluation |
-| Native-histogram rates | [#18564](https://github.com/prometheus/prometheus/pull/18564), [#18943](https://github.com/prometheus/prometheus/pull/18943) | Handle resets, schema changes, warnings, interpolation, and mixed ranges correctly |
-| Start-timestamp persistence | [#18609](https://github.com/prometheus/prometheus/pull/18609) | Preserve histogram start timestamps through chunks, WAL/WBL replay, blocks, reopen, and queries |
-| Stale-series WAL expiry | [#18847](https://github.com/prometheus/prometheus/pull/18847) | Retain stale-series metadata only while WAL references still need it |
+| [Unix-socket scraping](tasks/unix-socket-scraping/)<br>Collect metrics over Unix sockets while preserving HTTP/TLS behavior. | Prometheus [18091](https://github.com/prometheus/prometheus/pull/18091), [19399](https://github.com/prometheus/prometheus/pull/19399) | Both failed caller-option precedence despite passing routing, reload and retirement checks. |
+| [Fixed-time subqueries](tasks/prometheus-subquery-semantics/)<br>Keep nested queries pinned to a fixed time correct across evaluation paths. | Prometheus [19187](https://github.com/prometheus/prometheus/pull/19187) | One returned 99 instead of 36; the other missed standalone evaluation. |
+| [WAL expiry](tasks/stale-wal-expiry/)<br>Retain deleted-series metadata until log replay no longer needs it. | Prometheus [18847](https://github.com/prometheus/prometheus/pull/18847) | One passed. The other changed checkpoint filtering and weakened existing tests; the independent verifier rejected it. |
+| [Histogram rates](tasks/histogram-rate-semantics/)<br>Calculate histogram increases and rates correctly across resets and range boundaries. | Prometheus [18564](https://github.com/prometheus/prometheus/pull/18564), [18943](https://github.com/prometheus/prometheus/pull/18943) | One omitted the initial range sample; the other missed a terminal reset, returning −90 instead of 372. |
+| [Start-timestamp persistence](tasks/start-timestamp-persistence/)<br>Preserve histogram start timestamps through restarts and storage compaction. | Prometheus [18609](https://github.com/prometheus/prometheus/pull/18609) | One had chunk-lifecycle and format defects; the other missed replay wiring. |
+| [Query-cache reuse](tasks/thanos-cache-reuse/)<br>Reuse cached query results at different time intervals without losing samples. | Thanos [8876](https://github.com/thanos-io/thanos/pull/8876) | 9/30 and 27/30 checks. The latter lost fetched points during merging and advertised cache coverage beyond its stored data. |
+| [Missing-series fill](tasks/victoriametrics-fill-modifiers/)<br>Apply fill values when vector operations encounter missing samples or series. | VictoriaMetrics [11207](https://github.com/VictoriaMetrics/VictoriaMetrics/pull/11207) | One failed compilation; the other passed 111/135 checks but mishandled missing series and metric names. |
 
-Start-timestamp persistence spans 34 upstream files, more than the other four tasks.
+I asked the agent to read through the completed runs to understand what went wrong and check for shortcuts. Some fixes were small: adding two missing settings fixed one restart test. But we had not run that repaired version through every test, so it still could not count as a pass. The Thanos solution that passed 27 of 30 checks was a different case: it still left data out of query results.
 
-## One shared episode lifecycle
+We found no signs of agents looking up the answers or accessing the hidden tests, though internet downloads were allowed. One WAL attempt changed existing tests to fit its broken code; our separate tests still caught the bug. Harbor's review tool also got some facts and counts wrong, so the agent checked those reviews against the code and actual test output.
 
-```text
-pinned pre-change source -> coding agent -> frozen source archive
-                         -> separate verifier -> reward 0 or 1
+## Run the tasks
+
+The table above summarizes the results. [results.json](results.json) keeps the recorded test outputs and identifiers in one small file; the full run logs stay local.
+
+The runnable packages are in [tasks/](tasks/). [task_support/](task_support/) contains the pinned source, reference patches and files used to build them. Some tasks combine related PRs into one request.
+
+Copy `.env.example` to `.env` and set `DAYTONA_API_KEY`, then run a reference solution with the live-service checks:
+
+```sh
+# With Harbor 0.14.0 and Daytona configured:
+python3 tools/run_eval.py \
+  --task tasks/unix-socket-scraping --agent oracle-smoke \
+  --job live-env-swe-lab-uds-oracle-01 --env-file .env
 ```
 
-The agent works in a Git-stripped Prometheus tree. The upstream patch, repository history, verifier source, and hidden tests are absent. Harbor runs the episode on Daytona with 2 vCPU, 4 GiB RAM, and 10 GiB disk.
-
-The verifier drives Prometheus behavior through live scrape targets, PromQL queries, WAL checkpoints, block reopen, replay, compaction, and iterators. Reward comes from the running system and its artifacts, never from comparing the candidate diff with the upstream diff.
-
-The same handoff works across all five tasks. A team can add another Prometheus subsystem without writing a new actor runtime.
-
-## Results
-
-Each complete cohort used two Luna attempts per task, for ten attempts in total. The first complete cohort used max reasoning and solved 8 of 10. The final cohort used Harbor's default high reasoning and solved 2 of 10.
-
-| Cohort | UDS | Subquery | Histogram | Start timestamp | WAL expiry | Total |
-|---|---:|---:|---:|---:|---:|---:|
-| First full Luna cohort, max reasoning | 2/2 | 2/2 | 0/2 | 2/2 | 2/2 | 8/10 |
-| Final Luna cohort, default high reasoning | 0/2 | 0/2 | 0/2 | 0/2 | 2/2 | 2/10 |
-
-These are milestones from the build, not a controlled model comparison. The verifier bytes and reasoning setting changed between cohorts. The [Improvement Changelog](CHANGELOG.md) records what changed and why.
-
-All 10 final trials completed without Harbor exceptions. Together they cost `$2.59163820` and took `3:15:24.21` in summed trial time.
-
-## Final verifier calibration
-
-The final verifier classified five registered candidates for each task:
-
-- the merged implementation should pass
-- unchanged code should fail
-- one registered alternate-valid fixture should pass
-- two injected mutants should fail
-
-Across five tasks, that is 10 expected-pass candidates and 15 expected-fail candidates. All 25 were classified correctly. On this fixed set, balanced accuracy is `1.0`, false-accept rate is `0.0`, and false-reject rate is `0.0`. Those numbers measure the verifier. Luna's final solve rate is the separate 2/10 result above.
-
-## The challenging case
-
-Start-timestamp persistence exposed a verifier gap. Two Luna solutions carried the feature through the storage lifecycle, but each wrote its own on-disk format. Both passed an earlier behavioral verifier. Neither format matched the one Prometheus merged.
-
-The final episode leaves implementation names and code layout open while requiring persisted blocks to work with the merged Prometheus reader. The two earlier solutions now fail that compatibility check.
-
-Job receipts and task digests are in the [evidence ledger](docs/TASK_SUITE_EVIDENCE.md).
-
-## Submission map
-
-The submission archive uses these paths:
-
-| What you need | Location |
-|---|---|
-| Canonical task source | `task_support/prometheus/tasks/` |
-| Runnable Harbor packages | `tasks/`, created by `python3 tools/materialize_prometheus_task.py` |
-| Task instructions shown to agents | `tasks/*/instruction.md` after materialization |
-| Reference solutions and verifiers | `tasks/*/solution/` and `tasks/*/tests/` after materialization |
-| Clean-machine commands | [`docs/REPRODUCTION.md`](docs/REPRODUCTION.md) |
-| Task digests, job receipts, and run results | [`docs/TASK_SUITE_EVIDENCE.md`](docs/TASK_SUITE_EVIDENCE.md) |
-| Completed Luna trajectories and their index | `trajectories/`, starting with `trajectories/README.md` |
-
-The HackerEarth upload archive omits the generated `tasks/` copies to stay below its 50 MB limit. The materializer recreates them from `task_support/` and verifies their checksums.
-
-A trajectory records the instruction, agent messages, tool calls, tool responses, and outcome. A raw Harbor job also contains working directories, verifier output, collected repository archives, runtime logs, and coordinator state.
-
-The upload contains 42 completed, exception-free Luna trajectories. Its index also accounts for five excluded trial slots: two cancellations, one actor timeout, one UDS run stranded before grading, and one start-timestamp slot that stopped before writing a trajectory. Raw jobs stay local.
-
-## Reproduce it
-
-Materialize all five task packages:
-
-```bash
-python3 tools/materialize_prometheus_task.py
-python3 tools/materialize_prometheus_task.py --verify
-```
-
-The [reproduction guide](docs/REPRODUCTION.md) gives the public clone commands, pinned runtime, 25-case run, and Luna command. The registry is [suite.toml](task_support/prometheus/suite.toml).
-
-## Limits
-
-This repository includes reference solutions and verifier code for inspection and reproduction. Before using it as a secret network-enabled evaluation set, move the hidden cases behind a private boundary.
-
-The histogram task still has one verifier-owned Go test linked with candidate code. The other checks run through external processes or inspect artifacts produced by candidate programs. The [verifier provenance audit](docs/VERIFIER_PROVENANCE_AUDIT.md) describes that boundary.
-
-## License
-
-Project-authored files use Apache-2.0. Bundled Prometheus source keeps the upstream Apache-2.0 license and notices.
+The runner also supports `nop-smoke` for the unchanged baseline and `codex` for solver trials. Project-authored files use [Apache-2.0](LICENSE); upstream source retains its [licenses and notices](NOTICE).

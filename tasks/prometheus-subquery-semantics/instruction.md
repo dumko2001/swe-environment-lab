@@ -1,5 +1,5 @@
-We’re seeing dashboard panels return empty or inconsistent series when a fixed-time PromQL subquery is passed to a function whose result changes at each step. One report reproduces it with `quantile_over_time(scalar(arg), metric[2m1s:30s] @ 2m)`: the subquery form returns empty even though the matching matrix selector and constant-argument form return data. Instant and range queries over the same data disagree, while ordinary subqueries remain healthy.
+Some dashboard panels go empty when a fixed-time subquery is passed to a function with another argument that changes at each step. For example, `quantile_over_time(scalar(arg), metric[2m1s:30s] @ 2m)` returns nothing, while the equivalent matrix selector or a constant argument works. Instant and range queries disagree too. We’re also seeing errors when a fixed-time subquery is queried on its own.
 
-Restore correct instant and range query results.
+Can you fix this without losing the reuse of computations that don't change between steps?
 
 Do not look for or use online solutions.

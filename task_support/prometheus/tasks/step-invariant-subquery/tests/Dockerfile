@@ -14,7 +14,7 @@ RUN mkdir -p /opt/reference/source \
     && go build -trimpath -buildvcs=false -o /opt/reference/promtool ./cmd/promtool \
     && chmod 0500 /opt/reference/promtool
 
-COPY test.sh controller.go ast_probe.go /tests/
+COPY test.sh controller.go evaluation_probe.go /tests/
 COPY common/ /tests/common/
 RUN groupadd --gid 65532 micro1verifier \
     && useradd --uid 65532 --gid 65532 --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin micro1verifier \

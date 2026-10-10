@@ -9,10 +9,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
     GOPROXY=https://proxy.golang.org,direct \
     GOSUMDB=sum.golang.org \
     GOCACHE=/opt/micro1-go-build-cache \
-    PROMETHEUS_ROOT=/app/prometheus
+    PROMETHEUS_ROOT=/app/prometheus GOMAXPROCS=4 GOFLAGS="-p=4"
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl git patch \
+    && apt-get install -y --no-install-recommends ca-certificates curl git patch python3 openssl procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Only the immutable source inputs needed to reconstruct the clean parent are
@@ -27,7 +27,7 @@ RUN chmod 0555 /usr/local/bin/verify-prometheus-source \
 
 WORKDIR /app/prometheus
 
-# Network is available only while building the immutable image. go.sum pins
+# Dependencies are prewarmed while building the immutable image. go.sum pins
 # module contents, and this layer is reused by every rollout for the task.
 RUN mkdir -p "$GOCACHE" \
     && go mod download \
@@ -47,5 +47,14 @@ RUN useradd --create-home --uid 1000 --shell /bin/bash agent \
 # root-owned setup/collection, and explicitly switches the agent phase to the
 # task's configured `agent` user. Keeping PID 1 as root avoids an impossible
 # `su root` from an unprivileged image user while preserving the nonroot agent.
+COPY runtime/ /opt/task-runtime/
+RUN mkdir -p /app/task-runtime/bin && GOWORK=off go build -o /app/task-runtime/bin/prometheus ./cmd/prometheus && GOWORK=off go build -o /app/task-runtime/bin/seed /opt/task-runtime/seed.go \
+    && if test -f /opt/task-runtime/storage-demo.go; then GOWORK=off go build -o /app/task-runtime/bin/storage-demo /opt/task-runtime/storage-demo.go; fi \
+    && chmod +x /opt/task-runtime/task-env /opt/task-runtime/boot.sh \
+    && ln -s /opt/task-runtime/task-env /usr/local/bin/task-env \
+    && ln -s /opt/task-runtime/ENVIRONMENT.md /app/ENVIRONMENT.md \
+    && chown -R agent:agent /app/task-runtime /opt/task-runtime
+RUN ln -s /usr/local/go/bin/go /usr/local/bin/go && ln -s /usr/local/go/bin/gofmt /usr/local/bin/gofmt
 USER root
+ENTRYPOINT ["/opt/task-runtime/boot.sh"]
 CMD ["sleep", "infinity"]

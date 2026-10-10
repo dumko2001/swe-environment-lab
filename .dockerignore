@@ -7,7 +7,9 @@ auth.json
 .codex
 .agents
 jobs
-submission/private
+submission
+dist
+datavendor
 trajectories/raw
 recordings/raw
 tmp

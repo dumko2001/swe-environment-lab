@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 
@@ -14,9 +16,15 @@ import (
 	"github.com/prometheus/prometheus/tsdb/wlog"
 )
 
+type storedSample struct {
+	T    int64  `json:"t"`
+	Bits uint64 `json:"bits"`
+}
+
 type result struct {
-	Checkpoint map[string]bool `json:"checkpoint"`
-	Queryable  map[string]bool `json:"queryable"`
+	Samples    map[string][]storedSample `json:"samples"`
+	Checkpoint map[string]bool           `json:"checkpoint"`
+	Queryable  map[string]bool           `json:"queryable"`
 }
 
 func main() {
@@ -33,7 +41,7 @@ func main() {
 	}
 	defer segments.Close()
 
-	decodedResult := result{Checkpoint: map[string]bool{}, Queryable: map[string]bool{}}
+	decodedResult := result{Checkpoint: map[string]bool{}, Queryable: map[string]bool{}, Samples: map[string][]storedSample{}}
 	decoder := record.NewDecoder(labels.NewSymbolTable(), promslog.NewNopLogger())
 	reader := wlog.NewReader(segments)
 	for reader.Next() {
@@ -65,8 +73,17 @@ func main() {
 	for _, metric := range os.Args[2:] {
 		set := querier.Select(context.Background(), false, nil, labels.MustNewMatcher(labels.MatchEqual, "__name__", metric))
 		for set.Next() {
-			iterator := set.At().Iterator(nil)
-			if iterator.Next() != chunkenc.ValNone {
+			series := set.At()
+			if series.Labels().String() != labels.FromStrings("__name__", metric).String() {
+				panic("persisted series labels changed")
+			}
+			iterator := series.Iterator(nil)
+			for kind := iterator.Next(); kind != chunkenc.ValNone; kind = iterator.Next() {
+				if kind != chunkenc.ValFloat {
+					panic(fmt.Sprintf("unexpected stored sample type %v", kind))
+				}
+				timestamp, value := iterator.At()
+				decodedResult.Samples[metric] = append(decodedResult.Samples[metric], storedSample{T: timestamp, Bits: math.Float64bits(value)})
 				decodedResult.Queryable[metric] = true
 			}
 			if err := iterator.Err(); err != nil {

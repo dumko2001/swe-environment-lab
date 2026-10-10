@@ -20,16 +20,11 @@ else
   exit 0
 fi
 
-rm -rf "$work/prometheus/cmd/micro1-st-program" "$work/prometheus/cmd/micro1-st-candidate-reader"
-mkdir -p "$work/prometheus/cmd/micro1-st-program"
-mkdir -p "$work/prometheus/cmd/micro1-st-candidate-reader"
-cp /tests/candidate_program.go "$work/prometheus/cmd/micro1-st-program/main.go"
-cp /tests/candidate_reader.go "$work/prometheus/cmd/micro1-st-candidate-reader/main.go"
-if ! (MICRO1_GOMAXPROCS=2 MICRO1_GOFLAGS='-mod=mod -p=1' /tests/common/hardened-run.sh compile-program "$work/prometheus" ./cmd/micro1-st-program "$candidate_program" \
-		&& MICRO1_GOMAXPROCS=2 MICRO1_GOFLAGS='-mod=mod -p=1' /tests/common/hardened-run.sh compile-program "$work/prometheus" ./cmd/micro1-st-candidate-reader "$candidate_reader" \
+if ! (MICRO1_GOMAXPROCS=2 MICRO1_GOFLAGS='-mod=mod -p=1' sh /tests/build-storage-probe.sh "$work/prometheus" /tests/candidate_program.go "$candidate_program" \
+		&& MICRO1_GOMAXPROCS=2 MICRO1_GOFLAGS='-mod=mod -p=1' sh /tests/build-storage-probe.sh "$work/prometheus" /tests/candidate_reader.go "$candidate_reader" \
 		&& MICRO1_GOMAXPROCS=2 MICRO1_GOFLAGS='-mod=mod -p=1' /tests/common/hardened-run.sh compile-program "$work/prometheus" ./cmd/prometheus "$prometheus_server" \
 		&& MICRO1_GOMAXPROCS=2 MICRO1_GOFLAGS='-mod=mod -p=1' /tests/common/hardened-run.sh compile-trusted-controller /opt/reference/source /tests/legacy_writer.go "$legacy_writer" \
-		&& MICRO1_GOMAXPROCS=2 MICRO1_GOFLAGS='-mod=mod -p=1' /tests/common/hardened-run.sh compile-trusted-controller /opt/oracle/source /tests/candidate_reader.go "$oracle_reader" \
+		&& MICRO1_GOMAXPROCS=2 MICRO1_GOFLAGS='-mod=mod -p=1' /tests/common/hardened-run.sh compile-trusted-controller /opt/oracle/source /tests/oracle_reader.go "$oracle_reader" \
 		&& MICRO1_GOMAXPROCS=2 MICRO1_GOFLAGS='-mod=mod -p=1' /tests/common/hardened-run.sh compile-trusted-controller /opt/reference/source /tests/controller.go "$controller"); then
   printf '0\n' > /logs/verifier/reward.txt
   printf '%s\n' '{"phase":"build","status":"candidate_build_failed","reward":0}' > /logs/verifier/status.json

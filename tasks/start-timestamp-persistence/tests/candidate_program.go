@@ -4,7 +4,6 @@ import (
 	"context"
 	"math"
 	"os"
-	"reflect"
 	"strconv"
 
 	"github.com/prometheus/common/promslog"
@@ -19,8 +18,8 @@ import (
 
 const lifecycleSamples = 130
 
-func options(xor2, stStorage bool) *tsdb.Options {
-	opts := tsdb.DefaultOptions()
+func options(xor2, stStorage, histogramEncoding bool) *tsdb.Options {
+	opts := publicStorageOptions(xor2, histogramEncoding)
 	opts.MinBlockDuration = 100
 	opts.MaxBlockDuration = 100
 	opts.EnableSTStorage = stStorage
@@ -142,6 +141,40 @@ func staleHistogram(ordinal int) *histogram.Histogram {
 	panic("invalid stale sample")
 }
 
+// Write ordinary float samples using only public feature parsing. ST storage is
+// deliberately off: histogram encoding must not change the float codec.
+func writeFloatEncoding(dir, metric string, base, count int64, xor2, histogramEncoding bool) {
+	var flags []string
+	if xor2 {
+		flags = append(flags, "xor2-encoding")
+	}
+	if histogramEncoding {
+		flags = append(flags, "histograms-st-encoding")
+	}
+	opts := publicFeatureOptions(flags)
+	opts.MinBlockDuration, opts.MaxBlockDuration = 100, 100
+	db, err := tsdb.Open(dir, promslog.NewNopLogger(), nil, opts, nil)
+	if err != nil {
+		panic(err)
+	}
+	db.DisableCompactions()
+	app := db.AppenderV2(context.Background())
+	for i := int64(0); i < 4; i++ {
+		if _, err := app.Append(0, labels.FromStrings("__name__", metric), 0, base+i, float64(count+i), nil, nil, storage.AppendV2Options{}); err != nil {
+			panic(err)
+		}
+	}
+	if err := app.Commit(); err != nil {
+		panic(err)
+	}
+	if err := db.CompactHead(tsdb.NewRangeHead(db.Head(), base, base+3)); err != nil {
+		panic(err)
+	}
+	if err := db.Close(); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	if len(os.Args) != 11 {
 		panic("invalid arguments")
@@ -167,27 +200,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	optionIndex, err := strconv.Atoi(os.Args[9])
-	if err != nil {
-		panic(err)
-	}
 	profile, err := strconv.Atoi(os.Args[10])
 	if err != nil {
 		panic(err)
 	}
 
-	histogramEncoding := mode != "legacy" && mode != "disabled"
-	opts := options(xor2, true)
-	if histogramEncoding {
-		if optionIndex < 0 || optionIndex >= reflect.TypeOf(*opts).NumField() {
-			panic("invalid option index")
-		}
-		field := reflect.ValueOf(opts).Elem().Field(optionIndex)
-		if field.Kind() != reflect.Bool || !field.CanSet() || field.Bool() {
-			panic("option is not an independently disabled boolean")
-		}
-		field.SetBool(true)
+	if mode == "float-encoding-disabled" || mode == "float-encoding-enabled" {
+		writeFloatEncoding(dir, metric, base, count, xor2, mode == "float-encoding-enabled")
+		return
 	}
+
+	histogramEncoding := mode != "legacy" && mode != "disabled"
+	opts := options(xor2, true, histogramEncoding)
 	db, err := tsdb.Open(dir, promslog.NewNopLogger(), nil, opts, nil)
 	if err != nil {
 		panic(err)

@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 6 {
+	if len(os.Args) != 9 {
 		panic("invalid arguments")
 	}
 	dir := os.Args[1]
@@ -29,6 +29,14 @@ func main() {
 		panic(err)
 	}
 
+	values := make([]float64, 3)
+	for index := range values {
+		values[index], err = strconv.ParseFloat(os.Args[6+index], 64)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	opts := tsdb.DefaultOptions()
 	opts.MinBlockDuration = 1000
 	opts.MaxBlockDuration = 1000
@@ -39,14 +47,14 @@ func main() {
 	db.DisableCompactions()
 
 	app := db.Appender(context.Background())
-	selectedRef, err := app.Append(0, selected, maxt-100, 1)
+	selectedRef, err := app.Append(0, selected, maxt-100, values[0])
 	if err != nil {
 		panic(err)
 	}
 	if _, err = app.Append(selectedRef, selected, maxt, math.Float64frombits(value.StaleNaN)); err != nil {
 		panic(err)
 	}
-	activeRef, err := app.Append(0, active, maxt-100, 7)
+	activeRef, err := app.Append(0, active, maxt-100, values[1])
 	if err != nil {
 		panic(err)
 	}
@@ -58,7 +66,7 @@ func main() {
 	}
 
 	app = db.Appender(context.Background())
-	if _, err = app.Append(activeRef, active, maxt+100, 8); err != nil {
+	if _, err = app.Append(activeRef, active, maxt+100, values[2]); err != nil {
 		panic(err)
 	}
 	if err = app.Commit(); err != nil {

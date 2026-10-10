@@ -1,0 +1,57 @@
+schema_version = "1.0"
+artifacts = ["/app/verifier-artifacts/candidate.tar.gz", "/app/verifier-artifacts/candidate.sha256"]
+[metadata]
+author_organization = "Not specified"
+author_name = "Sidharth Rajmohan"
+author_email = "micro1@example.invalid"
+category = "Observability"
+tags = ["thanos", "query-frontend", "cache", "promql", "correctness"]
+difficulty_explanation = "A Thanos maintainer is reducing repeated backend queries when users zoom dashboard time ranges. Humans and agents must decide whether cached samples cover the exact times and request identity now needed, retrieve missing portions, and avoid changing later cache hits. The challenge is preserving both query results and cache usefulness across repeated requests, not merely returning a cached response once. The task uses real upstream source with synthetic time-based query data and a real local Query/cache deployment to reproduce dashboard request patterns."
+solution_explanation = "The reference keeps ordinary exact cache hits unchanged. After a miss, it searches compatible denser entries and selects samples on the requested time grid. It avoids mixing responses with different sample spacing in one cache entry, so later zoom changes retain correct coverage."
+verification_explanation = "The verifier builds the submitted frontend and sends real HTTP queries through it to a clean Thanos Query service and Memcached. A trusted proxy independently counts backend requests while the controller checks values, timestamps and labels. On a cold unsplit 12-hour-step request, a trusted byte-forwarding recorder counts actual retrieval command lines sent to real Memcached, bounding ordinary and compatible lookup reads to two commands while checking all returned samples. Full and partial cache coverage, incompatible grids, repeated zooms, tenant isolation, histograms and frontend restarts distinguish genuine reusable results from wrong data or an implementation that always queries the backend."
+expert_time_estimate_hours = 4.0
+relevant_experience = "Go, PromQL query frontend middleware, distributed caching"
+[agent]
+timeout_sec = 14400.0
+user = "agent"
+[environment]
+build_timeout_sec = 3600.0
+cpus = 4
+memory_mb = 8192
+storage_mb = 10240
+gpus = 0
+network_mode = "public"
+[verifier]
+environment_mode = "separate"
+timeout_sec = 1800.0
+[verifier.environment]
+build_timeout_sec = 3600.0
+cpus = 4
+memory_mb = 8192
+storage_mb = 10240
+gpus = 0
+network_mode = "no-network"
+[[verifier.collect]]
+timeout_sec = 180.0
+user = "root"
+command = '''
+set -eu
+for status_file in /proc/[0-9]*/status; do
+  pid=${status_file#/proc/}; pid=${pid%/status}
+  test "$pid" != 1 || continue
+  test "$(awk '/^Uid:/{print $2}' "$status_file")" != 1000 || kill -KILL "$pid" 2>/dev/null || true
+done
+chown -R root:root /app/thanos
+chmod -R a-w /app/thanos
+rm -rf /app/verifier-artifacts
+install -d -o root -g root -m 0700 /app/verifier-artifacts
+cd /app
+tar --exclude='thanos/.git' --exclude='thanos/.cache' --exclude='thanos/pkg/ui/react-app/node_modules' --exclude='thanos/thanos' -czf /app/verifier-artifacts/candidate.tar.gz thanos
+sha256sum /app/verifier-artifacts/candidate.tar.gz > /app/verifier-artifacts/candidate.sha256
+'''
+
+[environment.healthcheck]
+command = "/usr/local/bin/task-env start"
+timeout_sec = 180.0
+interval_sec = 5.0
+retries = 3

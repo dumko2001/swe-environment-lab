@@ -1,0 +1,2 @@
+# Patch files preserve upstream diff context, including context spaces before tabs.
+*.patch -whitespace

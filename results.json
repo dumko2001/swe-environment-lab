@@ -1,0 +1,3377 @@
+{
+  "scope": "Final selected two-attempt calibration; earlier verifier versions and superseded runs are excluded. Recorded results, not a fresh execution.",
+  "model": "gpt-6-luna",
+  "reasoning_effort": "high",
+  "trial_count": 14,
+  "pass_count": 1,
+  "attempts": [
+    {
+      "task": "unix-socket-scraping",
+      "attempt": 1,
+      "job": "live-env-cal2t-1010-unix-socket-scraping-luna-01",
+      "reward": 0.0,
+      "candidate_sha256": "900851b1cd3d2d72778349ce477e7a8fd1e79eefe910f88cea3bcb6e8ae4e936",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "verify",
+          "status": "behavioral_failure",
+          "reward": 0
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\n--- FAIL: TestMicro1UnixSocketCallerDialOption (0.00s)\n    micro1_pool_identity_test.go:197: \n        \tError Trace:\t/tmp/candidate/prometheus/scrape/micro1_pool_identity_test.go:197\n        \tError:      \t\"0\" is not greater than \"0\"\n        \tTest:       \tTestMicro1UnixSocketCallerDialOption\n        \tMessages:   \tcaller HTTP dial option was discarded\nFAIL\n"
+      }
+    },
+    {
+      "task": "unix-socket-scraping",
+      "attempt": 2,
+      "job": "live-env-cal2t-1010-unix-socket-scraping-luna-02",
+      "reward": 0.0,
+      "candidate_sha256": "36d7bcbae6bed1a8d86a1f5bef8a1b7fdbde5095cb3eb927a3e79022d242ed34",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "verify",
+          "status": "behavioral_failure",
+          "reward": 0
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\n--- FAIL: TestMicro1UnixSocketCallerDialOption (0.00s)\n    micro1_pool_identity_test.go:197: \n        \tError Trace:\t/tmp/candidate/prometheus/scrape/micro1_pool_identity_test.go:197\n        \tError:      \t\"0\" is not greater than \"0\"\n        \tTest:       \tTestMicro1UnixSocketCallerDialOption\n        \tMessages:   \tcaller HTTP dial option was discarded\nFAIL\n"
+      }
+    },
+    {
+      "task": "prometheus-subquery-semantics",
+      "attempt": 1,
+      "job": "live-env-cal2r-1010-prometheus-subquery-semantics-luna-01",
+      "reward": 0.0,
+      "candidate_sha256": "2a02dcb1d6056e6a1d6ad20344f2c4d44a753efa763862c9cf20bd3b5c378ba2",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "evaluation-probe.log": "evaluated max_over_time(abs(vector(pi()))[121s:30s] @ 120) + time(); function calls: map[abs:1 pi:1]\n",
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "verify",
+          "status": "behavioral_failure",
+          "reward": 0
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\npanic: quantile_over_time((time() % 100) / 100, vector(time())[121s:30s] @ 120): step 0 got 99 @[30000] want 36\n\ngoroutine 1 [running]:\nmain.main.func3({0xa94f8d, 0x48}, 0xaa4268)\n\tgithub.com/prometheus/prometheus/cmd/micro1-step-evaluation-probe/main.go:58 +0x5e5\nmain.main()\n\tgithub.com/prometheus/prometheus/cmd/micro1-step-evaluation-probe/main.go:73 +0x3e4\n"
+      }
+    },
+    {
+      "task": "prometheus-subquery-semantics",
+      "attempt": 2,
+      "job": "live-env-cal2r-1010-prometheus-subquery-semantics-luna-02",
+      "reward": 0.0,
+      "candidate_sha256": "1e53dd6eb30047819ac4bc9e5310ebabd5ffe4bb9af983f96e9a3ffc4ba9ea94",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "evaluation-probe.log": "evaluated max_over_time(abs(vector(pi()))[121s:30s] @ 120) + time(); function calls: map[abs:1 pi:1]\nevaluated quantile_over_time((time() % 100) / 100, vector(time())[121s:30s] @ 120); function calls: map[abs:0 pi:0]\nevaluated max_over_time(vector(time())[121s:30s]); function calls: map[abs:0 pi:0]\n",
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "verify",
+          "status": "behavioral_failure",
+          "reward": 0
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\npanic: unexpected number of samples\n\ngoroutine 1 [running]:\nmain.main()\n\tgithub.com/prometheus/prometheus/cmd/micro1-step-evaluation-probe/main.go:88 +0x7fb\n"
+      }
+    },
+    {
+      "task": "stale-wal-expiry",
+      "attempt": 1,
+      "job": "live-env-cal2r-1010-stale-wal-expiry-luna-01",
+      "reward": 1.0,
+      "candidate_sha256": "dca5a1be3ff1f8ed2a0173b2c53c01caad6777c172242d5a3e05f8a59e387790",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "reward.txt": 1,
+        "status.json": {
+          "phase": "verify",
+          "status": "passed",
+          "reward": 1
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\n"
+      }
+    },
+    {
+      "task": "stale-wal-expiry",
+      "attempt": 2,
+      "job": "live-env-cal2r-1010-stale-wal-expiry-luna-02",
+      "reward": 0.0,
+      "candidate_sha256": "b3c0c6f8b7debf6c05e91b4c56e23b08fac231a27d1cd5b517f34bbfe2155ceb",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "verify",
+          "status": "behavioral_failure",
+          "reward": 0
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\npanic: inclusive checkpoint boundary violated\n\ngoroutine 1 [running]:\nmain.main()\n\t./main.go:93 +0x498\n"
+      }
+    },
+    {
+      "task": "victoriametrics-fill-modifiers",
+      "attempt": 1,
+      "job": "live-env-cal2r-1010-victoriametrics-fill-modifiers-luna-01",
+      "reward": 0.0,
+      "candidate_sha256": "e691991ddb3679b0c8bfcb9dadbd3d8cb65d4816a9fa03df411534006543b401",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "build.log": "# github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/promql\napp/vmselect/promql/binary_op.go:233:18: cannot use key (variable of type int) as string value in map index\napp/vmselect/promql/binary_op.go:236:26: cannot range over tss (variable of type *timeseries)\napp/vmselect/promql/binary_op.go:251:38: cannot use mRight (variable of type map[string][]*timeseries) as []*timeseries value in argument to addPlaceholders\napp/vmselect/promql/binary_op.go:252:40: cannot use mLeft (variable of type map[string][]*timeseries) as []*timeseries value in argument to addPlaceholders\n",
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "build",
+          "status": "candidate_build_failed",
+          "reward": 0
+        },
+        "test-stdout.txt": ""
+      }
+    },
+    {
+      "task": "victoriametrics-fill-modifiers",
+      "attempt": 2,
+      "job": "live-env-cal2r-1010-victoriametrics-fill-modifiers-luna-02",
+      "reward": 0.0,
+      "candidate_sha256": "2dce3af7ef39af9fa5be5f9b3ecf8a370236127156346eb0d421d470dcaad023",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "build.log": "",
+        "checks.json": [
+          {
+            "case": "seed-127/ingestion-control",
+            "passed": true
+          },
+          {
+            "case": "seed-127/ordinary-intersection",
+            "passed": true
+          },
+          {
+            "case": "seed-127/symmetric-fill",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_bqocaykhry'),): [(1791634560.0, 27.0), (1791634580.0, 27.0), (1791634600.0, 27.0), (1791634620.0, 27.0), (1791634640.0, 27.0), (1791634660.0, 27.0), (1791634680.0, 27.0)], (('id', 'left_bqocaykhry'),): [(1791634560.0, 4.0), (1791634580.0, 4.0), (1791634600.0, 4.0), (1791634620.0, 4.0), (1791634640.0, 4.0), (1791634660.0, 4.0), (1791634680.0, 4.0)]}, want {(('id', 'common_bqocaykhry'),): [(1791634560, 27.0), (1791634580, 27.0), (1791634600, 27.0), (1791634620, 27.0), (1791634640, 27.0), (1791634660, 27.0), (1791634680, 27.0)], (('id', 'left_bqocaykhry'),): [(1791634560, 4.0), (1791634580, 4.0), (1791634600, 4.0), (1791634620, 4.0), (1791634640, 4.0), (1791634660, 4.0), (1791634680, 4.0)], (('id', 'right_bqocaykhry'),): [(1791634560, 13.0), (1791634580, 13.0), (1791634600, 13.0), (1791634620, 13.0), (1791634640, 13.0), (1791634660, 13.0), (1791634680, 13.0)]}"
+          },
+          {
+            "case": "seed-127/left-fill-order",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_bqocaykhry'),): [(1791634560.0, -3.0), (1791634580.0, -3.0), (1791634600.0, -3.0), (1791634620.0, -3.0), (1791634640.0, -3.0), (1791634660.0, -3.0), (1791634680.0, -3.0)]}, want {(('id', 'common_bqocaykhry'),): [(1791634560, -3.0), (1791634580, -3.0), (1791634600, -3.0), (1791634620, -3.0), (1791634640, -3.0), (1791634660, -3.0), (1791634680, -3.0)], (('id', 'right_bqocaykhry'),): [(1791634560, -17.0), (1791634580, -17.0), (1791634600, -17.0), (1791634620, -17.0), (1791634640, -17.0), (1791634660, -17.0), (1791634680, -17.0)]}"
+          },
+          {
+            "case": "seed-127/right-fill-only",
+            "passed": true
+          },
+          {
+            "case": "seed-127/different-fill-values",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_bqocaykhry'),): [(1791634560.0, -3.0), (1791634580.0, -3.0), (1791634600.0, -3.0), (1791634620.0, -3.0), (1791634640.0, -3.0), (1791634660.0, -3.0), (1791634680.0, -3.0)], (('id', 'left_bqocaykhry'),): [(1791634560.0, -28.0), (1791634580.0, -28.0), (1791634600.0, -28.0), (1791634620.0, -28.0), (1791634640.0, -28.0), (1791634660.0, -28.0), (1791634680.0, -28.0)]}, want {(('id', 'common_bqocaykhry'),): [(1791634560, -3.0), (1791634580, -3.0), (1791634600, -3.0), (1791634620, -3.0), (1791634640, -3.0), (1791634660, -3.0), (1791634680, -3.0)], (('id', 'left_bqocaykhry'),): [(1791634560, -28.0), (1791634580, -28.0), (1791634600, -28.0), (1791634620, -28.0), (1791634640, -28.0), (1791634660, -28.0), (1791634680, -28.0)], (('id', 'right_bqocaykhry'),): [(1791634560, -17.0), (1791634580, -17.0), (1791634600, -17.0), (1791634620, -17.0), (1791634640, -17.0), (1791634660, -17.0), (1791634680, -17.0)]}"
+          },
+          {
+            "case": "seed-127/instant-consistency",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_bqocaykhry'),): [(1791634620.0, 27.0)], (('id', 'left_bqocaykhry'),): [(1791634620.0, 4.0)]}, want {(('id', 'common_bqocaykhry'),): [(1791634620, 27.0)], (('id', 'left_bqocaykhry'),): [(1791634620, 4.0)], (('id', 'right_bqocaykhry'),): [(1791634620, 13.0)]}"
+          },
+          {
+            "case": "seed-127/nested-aggregation",
+            "passed": false,
+            "detail": "(): got (1791634560.0, 126.0), want (1791634560, 144.0)"
+          },
+          {
+            "case": "seed-127/empty-left",
+            "passed": false,
+            "detail": "label sets: got {}, want {(('id', 'common_bqocaykhry'),): [(1791634560, 11.0), (1791634580, 11.0), (1791634600, 11.0), (1791634620, 11.0), (1791634640, 11.0), (1791634660, 11.0), (1791634680, 11.0)], (('id', 'right_bqocaykhry'),): [(1791634560, 9.0), (1791634580, 9.0), (1791634600, 9.0), (1791634620, 9.0), (1791634640, 9.0), (1791634660, 9.0), (1791634680, 9.0)]}"
+          },
+          {
+            "case": "seed-127/empty-right",
+            "passed": true
+          },
+          {
+            "case": "seed-127/both-empty",
+            "passed": true
+          },
+          {
+            "case": "seed-127/wrong-side-does-not-create",
+            "passed": true
+          },
+          {
+            "case": "seed-127/scalar-control",
+            "passed": true
+          },
+          {
+            "case": "seed-127/logical-control",
+            "passed": true
+          },
+          {
+            "case": "seed-127/default-control",
+            "passed": true
+          },
+          {
+            "case": "seed-127/on-label-projection",
+            "passed": true
+          },
+          {
+            "case": "seed-127/ignoring-label-projection",
+            "passed": true
+          },
+          {
+            "case": "seed-127/group-left",
+            "passed": true
+          },
+          {
+            "case": "seed-127/group-right",
+            "passed": true
+          },
+          {
+            "case": "seed-127/per-sample-gaps",
+            "passed": true
+          },
+          {
+            "case": "seed-127/gap-instant-empty",
+            "passed": true
+          },
+          {
+            "case": "seed-127/comparison-filter",
+            "passed": true
+          },
+          {
+            "case": "seed-127/comparison-bool",
+            "passed": true
+          },
+          {
+            "case": "seed-127/metric-name-control",
+            "passed": true
+          },
+          {
+            "case": "seed-127/sparse-vector-scalar",
+            "passed": true
+          },
+          {
+            "case": "seed-127/scalar-sparse-vector",
+            "passed": true
+          },
+          {
+            "case": "seed-127/sparse-scalar-pair",
+            "passed": true
+          },
+          {
+            "case": "seed-127/nan-scalar-right",
+            "passed": true
+          },
+          {
+            "case": "seed-127/nan-scalar-left",
+            "passed": true
+          },
+          {
+            "case": "seed-127/infinite-fill-left",
+            "passed": true
+          },
+          {
+            "case": "seed-127/infinite-fill-right",
+            "passed": true
+          },
+          {
+            "case": "seed-127/nan-fill-stays-absent",
+            "passed": true
+          },
+          {
+            "case": "seed-127/infinite-observation-not-missing",
+            "passed": true
+          },
+          {
+            "case": "seed-127/group-left-pair-missingness",
+            "passed": true
+          },
+          {
+            "case": "seed-127/group-right-pair-missingness",
+            "passed": true
+          },
+          {
+            "case": "seed-127/nested-group-missingness",
+            "passed": true
+          },
+          {
+            "case": "seed-127/disjoint-matching-right",
+            "passed": true
+          },
+          {
+            "case": "seed-127/disjoint-matching-left",
+            "passed": true
+          },
+          {
+            "case": "seed-127/overlapping-matching-stays-error",
+            "passed": true
+          },
+          {
+            "case": "seed-127/group-result-collision-stays-error",
+            "passed": true
+          },
+          {
+            "case": "seed-127/missing-left-comparison-name",
+            "passed": false,
+            "detail": "label sets: got {(('__name__', 'vm_right_bqocaykhry'), ('id', 'right_bqocaykhry')): [(1791634560.0, 0.0), (1791634580.0, 0.0), (1791634600.0, 0.0), (1791634620.0, 0.0), (1791634640.0, 0.0), (1791634660.0, 0.0), (1791634680.0, 0.0)]}, want {(('id', 'right_bqocaykhry'),): [(1791634560, 0.0), (1791634580, 0.0), (1791634600, 0.0), (1791634620, 0.0), (1791634640, 0.0), (1791634660, 0.0), (1791634680, 0.0)]}"
+          },
+          {
+            "case": "seed-127/present-left-comparison-name",
+            "passed": true
+          },
+          {
+            "case": "seed-127/set-union-control",
+            "passed": true
+          },
+          {
+            "case": "seed-127/set-unless-control",
+            "passed": true
+          },
+          {
+            "case": "seed-127/nested-fill-set-filter",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_bqocaykhry'),): [(1791634560.0, 27.0), (1791634580.0, 27.0), (1791634600.0, 27.0), (1791634620.0, 27.0), (1791634640.0, 27.0), (1791634660.0, 27.0), (1791634680.0, 27.0)]}, want {(('id', 'common_bqocaykhry'),): [(1791634560, 27.0), (1791634580, 27.0), (1791634600, 27.0), (1791634620, 27.0), (1791634640, 27.0), (1791634660, 27.0), (1791634680, 27.0)], (('id', 'right_bqocaykhry'),): [(1791634560, 13.0), (1791634580, 13.0), (1791634600, 13.0), (1791634620, 13.0), (1791634640, 13.0), (1791634660, 13.0), (1791634680, 13.0)]}"
+          },
+          {
+            "case": "seed-941/ingestion-control",
+            "passed": true
+          },
+          {
+            "case": "seed-941/ordinary-intersection",
+            "passed": true
+          },
+          {
+            "case": "seed-941/symmetric-fill",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_jntrsqxxuv'),): [(1791634560.0, 26.0), (1791634580.0, 26.0), (1791634600.0, 26.0), (1791634620.0, 26.0), (1791634640.0, 26.0), (1791634660.0, 26.0), (1791634680.0, 26.0)], (('id', 'left_jntrsqxxuv'),): [(1791634560.0, 10.0), (1791634580.0, 10.0), (1791634600.0, 10.0), (1791634620.0, 10.0), (1791634640.0, 10.0), (1791634660.0, 10.0), (1791634680.0, 10.0)]}, want {(('id', 'common_jntrsqxxuv'),): [(1791634560, 26.0), (1791634580, 26.0), (1791634600, 26.0), (1791634620, 26.0), (1791634640, 26.0), (1791634660, 26.0), (1791634680, 26.0)], (('id', 'left_jntrsqxxuv'),): [(1791634560, 10.0), (1791634580, 10.0), (1791634600, 10.0), (1791634620, 10.0), (1791634640, 10.0), (1791634660, 10.0), (1791634680, 10.0)], (('id', 'right_jntrsqxxuv'),): [(1791634560, 22.0), (1791634580, 22.0), (1791634600, 22.0), (1791634620, 22.0), (1791634640, 22.0), (1791634660, 22.0), (1791634680, 22.0)]}"
+          },
+          {
+            "case": "seed-941/left-fill-order",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_jntrsqxxuv'),): [(1791634560.0, 0.0), (1791634580.0, 0.0), (1791634600.0, 0.0), (1791634620.0, 0.0), (1791634640.0, 0.0), (1791634660.0, 0.0), (1791634680.0, 0.0)]}, want {(('id', 'common_jntrsqxxuv'),): [(1791634560, 0.0), (1791634580, 0.0), (1791634600, 0.0), (1791634620, 0.0), (1791634640, 0.0), (1791634660, 0.0), (1791634680, 0.0)], (('id', 'right_jntrsqxxuv'),): [(1791634560, -27.0), (1791634580, -27.0), (1791634600, -27.0), (1791634620, -27.0), (1791634640, -27.0), (1791634660, -27.0), (1791634680, -27.0)]}"
+          },
+          {
+            "case": "seed-941/right-fill-only",
+            "passed": true
+          },
+          {
+            "case": "seed-941/different-fill-values",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_jntrsqxxuv'),): [(1791634560.0, 0.0), (1791634580.0, 0.0), (1791634600.0, 0.0), (1791634620.0, 0.0), (1791634640.0, 0.0), (1791634660.0, 0.0), (1791634680.0, 0.0)], (('id', 'left_jntrsqxxuv'),): [(1791634560.0, -15.0), (1791634580.0, -15.0), (1791634600.0, -15.0), (1791634620.0, -15.0), (1791634640.0, -15.0), (1791634660.0, -15.0), (1791634680.0, -15.0)]}, want {(('id', 'common_jntrsqxxuv'),): [(1791634560, 0.0), (1791634580, 0.0), (1791634600, 0.0), (1791634620, 0.0), (1791634640, 0.0), (1791634660, 0.0), (1791634680, 0.0)], (('id', 'left_jntrsqxxuv'),): [(1791634560, -15.0), (1791634580, -15.0), (1791634600, -15.0), (1791634620, -15.0), (1791634640, -15.0), (1791634660, -15.0), (1791634680, -15.0)], (('id', 'right_jntrsqxxuv'),): [(1791634560, -27.0), (1791634580, -27.0), (1791634600, -27.0), (1791634620, -27.0), (1791634640, -27.0), (1791634660, -27.0), (1791634680, -27.0)]}"
+          },
+          {
+            "case": "seed-941/instant-consistency",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_jntrsqxxuv'),): [(1791634620.0, 26.0)], (('id', 'left_jntrsqxxuv'),): [(1791634620.0, 10.0)]}, want {(('id', 'common_jntrsqxxuv'),): [(1791634620, 26.0)], (('id', 'left_jntrsqxxuv'),): [(1791634620, 10.0)], (('id', 'right_jntrsqxxuv'),): [(1791634620, 22.0)]}"
+          },
+          {
+            "case": "seed-941/nested-aggregation",
+            "passed": false,
+            "detail": "(): got (1791634560.0, 122.0), want (1791634560, 156.0)"
+          },
+          {
+            "case": "seed-941/empty-left",
+            "passed": false,
+            "detail": "label sets: got {}, want {(('id', 'common_jntrsqxxuv'),): [(1791634560, 8.0), (1791634580, 8.0), (1791634600, 8.0), (1791634620, 8.0), (1791634640, 8.0), (1791634660, 8.0), (1791634680, 8.0)], (('id', 'right_jntrsqxxuv'),): [(1791634560, 17.0), (1791634580, 17.0), (1791634600, 17.0), (1791634620, 17.0), (1791634640, 17.0), (1791634660, 17.0), (1791634680, 17.0)]}"
+          },
+          {
+            "case": "seed-941/empty-right",
+            "passed": true
+          },
+          {
+            "case": "seed-941/both-empty",
+            "passed": true
+          },
+          {
+            "case": "seed-941/wrong-side-does-not-create",
+            "passed": true
+          },
+          {
+            "case": "seed-941/scalar-control",
+            "passed": true
+          },
+          {
+            "case": "seed-941/logical-control",
+            "passed": true
+          },
+          {
+            "case": "seed-941/default-control",
+            "passed": true
+          },
+          {
+            "case": "seed-941/on-label-projection",
+            "passed": true
+          },
+          {
+            "case": "seed-941/ignoring-label-projection",
+            "passed": true
+          },
+          {
+            "case": "seed-941/group-left",
+            "passed": true
+          },
+          {
+            "case": "seed-941/group-right",
+            "passed": true
+          },
+          {
+            "case": "seed-941/per-sample-gaps",
+            "passed": true
+          },
+          {
+            "case": "seed-941/gap-instant-empty",
+            "passed": true
+          },
+          {
+            "case": "seed-941/comparison-filter",
+            "passed": true
+          },
+          {
+            "case": "seed-941/comparison-bool",
+            "passed": true
+          },
+          {
+            "case": "seed-941/metric-name-control",
+            "passed": true
+          },
+          {
+            "case": "seed-941/sparse-vector-scalar",
+            "passed": true
+          },
+          {
+            "case": "seed-941/scalar-sparse-vector",
+            "passed": true
+          },
+          {
+            "case": "seed-941/sparse-scalar-pair",
+            "passed": true
+          },
+          {
+            "case": "seed-941/nan-scalar-right",
+            "passed": true
+          },
+          {
+            "case": "seed-941/nan-scalar-left",
+            "passed": true
+          },
+          {
+            "case": "seed-941/infinite-fill-left",
+            "passed": true
+          },
+          {
+            "case": "seed-941/infinite-fill-right",
+            "passed": true
+          },
+          {
+            "case": "seed-941/nan-fill-stays-absent",
+            "passed": true
+          },
+          {
+            "case": "seed-941/infinite-observation-not-missing",
+            "passed": true
+          },
+          {
+            "case": "seed-941/group-left-pair-missingness",
+            "passed": true
+          },
+          {
+            "case": "seed-941/group-right-pair-missingness",
+            "passed": true
+          },
+          {
+            "case": "seed-941/nested-group-missingness",
+            "passed": true
+          },
+          {
+            "case": "seed-941/disjoint-matching-right",
+            "passed": true
+          },
+          {
+            "case": "seed-941/disjoint-matching-left",
+            "passed": true
+          },
+          {
+            "case": "seed-941/overlapping-matching-stays-error",
+            "passed": true
+          },
+          {
+            "case": "seed-941/group-result-collision-stays-error",
+            "passed": true
+          },
+          {
+            "case": "seed-941/missing-left-comparison-name",
+            "passed": false,
+            "detail": "label sets: got {(('__name__', 'vm_right_jntrsqxxuv'), ('id', 'right_jntrsqxxuv')): [(1791634560.0, 0.0), (1791634580.0, 0.0), (1791634600.0, 0.0), (1791634620.0, 0.0), (1791634640.0, 0.0), (1791634660.0, 0.0), (1791634680.0, 0.0)]}, want {(('id', 'right_jntrsqxxuv'),): [(1791634560, 0.0), (1791634580, 0.0), (1791634600, 0.0), (1791634620, 0.0), (1791634640, 0.0), (1791634660, 0.0), (1791634680, 0.0)]}"
+          },
+          {
+            "case": "seed-941/present-left-comparison-name",
+            "passed": true
+          },
+          {
+            "case": "seed-941/set-union-control",
+            "passed": true
+          },
+          {
+            "case": "seed-941/set-unless-control",
+            "passed": true
+          },
+          {
+            "case": "seed-941/nested-fill-set-filter",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_jntrsqxxuv'),): [(1791634560.0, 26.0), (1791634580.0, 26.0), (1791634600.0, 26.0), (1791634620.0, 26.0), (1791634640.0, 26.0), (1791634660.0, 26.0), (1791634680.0, 26.0)]}, want {(('id', 'common_jntrsqxxuv'),): [(1791634560, 26.0), (1791634580, 26.0), (1791634600, 26.0), (1791634620, 26.0), (1791634640, 26.0), (1791634660, 26.0), (1791634680, 26.0)], (('id', 'right_jntrsqxxuv'),): [(1791634560, 22.0), (1791634580, 22.0), (1791634600, 22.0), (1791634620, 22.0), (1791634640, 22.0), (1791634660, 22.0), (1791634680, 22.0)]}"
+          },
+          {
+            "case": "seed-2027/ingestion-control",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/ordinary-intersection",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/symmetric-fill",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_cmaikxeeph'),): [(1791634560.0, 27.0), (1791634580.0, 27.0), (1791634600.0, 27.0), (1791634620.0, 27.0), (1791634640.0, 27.0), (1791634660.0, 27.0), (1791634680.0, 27.0)], (('id', 'left_cmaikxeeph'),): [(1791634560.0, 23.0), (1791634580.0, 23.0), (1791634600.0, 23.0), (1791634620.0, 23.0), (1791634640.0, 23.0), (1791634660.0, 23.0), (1791634680.0, 23.0)]}, want {(('id', 'common_cmaikxeeph'),): [(1791634560, 27.0), (1791634580, 27.0), (1791634600, 27.0), (1791634620, 27.0), (1791634640, 27.0), (1791634660, 27.0), (1791634680, 27.0)], (('id', 'left_cmaikxeeph'),): [(1791634560, 23.0), (1791634580, 23.0), (1791634600, 23.0), (1791634620, 23.0), (1791634640, 23.0), (1791634660, 23.0), (1791634680, 23.0)], (('id', 'right_cmaikxeeph'),): [(1791634560, 13.0), (1791634580, 13.0), (1791634600, 13.0), (1791634620, 13.0), (1791634640, 13.0), (1791634660, 13.0), (1791634680, 13.0)]}"
+          },
+          {
+            "case": "seed-2027/left-fill-order",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_cmaikxeeph'),): [(1791634560.0, 17.0), (1791634580.0, 17.0), (1791634600.0, 17.0), (1791634620.0, 17.0), (1791634640.0, 17.0), (1791634660.0, 17.0), (1791634680.0, 17.0)]}, want {(('id', 'common_cmaikxeeph'),): [(1791634560, 17.0), (1791634580, 17.0), (1791634600, 17.0), (1791634620, 17.0), (1791634640, 17.0), (1791634660, 17.0), (1791634680, 17.0)], (('id', 'right_cmaikxeeph'),): [(1791634560, -17.0), (1791634580, -17.0), (1791634600, -17.0), (1791634620, -17.0), (1791634640, -17.0), (1791634660, -17.0), (1791634680, -17.0)]}"
+          },
+          {
+            "case": "seed-2027/right-fill-only",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/different-fill-values",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_cmaikxeeph'),): [(1791634560.0, 17.0), (1791634580.0, 17.0), (1791634600.0, 17.0), (1791634620.0, 17.0), (1791634640.0, 17.0), (1791634660.0, 17.0), (1791634680.0, 17.0)], (('id', 'left_cmaikxeeph'),): [(1791634560.0, -2.0), (1791634580.0, -2.0), (1791634600.0, -2.0), (1791634620.0, -2.0), (1791634640.0, -2.0), (1791634660.0, -2.0), (1791634680.0, -2.0)]}, want {(('id', 'common_cmaikxeeph'),): [(1791634560, 17.0), (1791634580, 17.0), (1791634600, 17.0), (1791634620, 17.0), (1791634640, 17.0), (1791634660, 17.0), (1791634680, 17.0)], (('id', 'left_cmaikxeeph'),): [(1791634560, -2.0), (1791634580, -2.0), (1791634600, -2.0), (1791634620, -2.0), (1791634640, -2.0), (1791634660, -2.0), (1791634680, -2.0)], (('id', 'right_cmaikxeeph'),): [(1791634560, -17.0), (1791634580, -17.0), (1791634600, -17.0), (1791634620, -17.0), (1791634640, -17.0), (1791634660, -17.0), (1791634680, -17.0)]}"
+          },
+          {
+            "case": "seed-2027/instant-consistency",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_cmaikxeeph'),): [(1791634620.0, 27.0)], (('id', 'left_cmaikxeeph'),): [(1791634620.0, 23.0)]}, want {(('id', 'common_cmaikxeeph'),): [(1791634620, 27.0)], (('id', 'left_cmaikxeeph'),): [(1791634620, 23.0)], (('id', 'right_cmaikxeeph'),): [(1791634620, 13.0)]}"
+          },
+          {
+            "case": "seed-2027/nested-aggregation",
+            "passed": false,
+            "detail": "(): got (1791634560.0, 150.0), want (1791634560, 168.0)"
+          },
+          {
+            "case": "seed-2027/empty-left",
+            "passed": false,
+            "detail": "label sets: got {}, want {(('id', 'common_cmaikxeeph'),): [(1791634560, 1.0), (1791634580, 1.0), (1791634600, 1.0), (1791634620, 1.0), (1791634640, 1.0), (1791634660, 1.0), (1791634680, 1.0)], (('id', 'right_cmaikxeeph'),): [(1791634560, 9.0), (1791634580, 9.0), (1791634600, 9.0), (1791634620, 9.0), (1791634640, 9.0), (1791634660, 9.0), (1791634680, 9.0)]}"
+          },
+          {
+            "case": "seed-2027/empty-right",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/both-empty",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/wrong-side-does-not-create",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/scalar-control",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/logical-control",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/default-control",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/on-label-projection",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/ignoring-label-projection",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/group-left",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/group-right",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/per-sample-gaps",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/gap-instant-empty",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/comparison-filter",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/comparison-bool",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/metric-name-control",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/sparse-vector-scalar",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/scalar-sparse-vector",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/sparse-scalar-pair",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/nan-scalar-right",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/nan-scalar-left",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/infinite-fill-left",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/infinite-fill-right",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/nan-fill-stays-absent",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/infinite-observation-not-missing",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/group-left-pair-missingness",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/group-right-pair-missingness",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/nested-group-missingness",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/disjoint-matching-right",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/disjoint-matching-left",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/overlapping-matching-stays-error",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/group-result-collision-stays-error",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/missing-left-comparison-name",
+            "passed": false,
+            "detail": "label sets: got {(('__name__', 'vm_right_cmaikxeeph'), ('id', 'right_cmaikxeeph')): [(1791634560.0, 0.0), (1791634580.0, 0.0), (1791634600.0, 0.0), (1791634620.0, 0.0), (1791634640.0, 0.0), (1791634660.0, 0.0), (1791634680.0, 0.0)]}, want {(('id', 'right_cmaikxeeph'),): [(1791634560, 0.0), (1791634580, 0.0), (1791634600, 0.0), (1791634620, 0.0), (1791634640, 0.0), (1791634660, 0.0), (1791634680, 0.0)]}"
+          },
+          {
+            "case": "seed-2027/present-left-comparison-name",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/set-union-control",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/set-unless-control",
+            "passed": true
+          },
+          {
+            "case": "seed-2027/nested-fill-set-filter",
+            "passed": false,
+            "detail": "label sets: got {(('id', 'common_cmaikxeeph'),): [(1791634560.0, 27.0), (1791634580.0, 27.0), (1791634600.0, 27.0), (1791634620.0, 27.0), (1791634640.0, 27.0), (1791634660.0, 27.0), (1791634680.0, 27.0)]}, want {(('id', 'common_cmaikxeeph'),): [(1791634560, 27.0), (1791634580, 27.0), (1791634600, 27.0), (1791634620, 27.0), (1791634640, 27.0), (1791634660, 27.0), (1791634680, 27.0)], (('id', 'right_cmaikxeeph'),): [(1791634560, 13.0), (1791634580, 13.0), (1791634600, 13.0), (1791634620, 13.0), (1791634640, 13.0), (1791634660, 13.0), (1791634680, 13.0)]}"
+          }
+        ],
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "verify",
+          "status": "behavioral_failure",
+          "reward": 0,
+          "passed": 111,
+          "total": 135
+        },
+        "test-stdout.txt": {
+          "reward": 0,
+          "passed": 111,
+          "total": 135
+        }
+      }
+    },
+    {
+      "task": "histogram-rate-semantics",
+      "attempt": 1,
+      "job": "live-env-cal2t-1010-histogram-rate-semantics-luna-01",
+      "reward": 0.0,
+      "candidate_sha256": "d67e3a4e732dd5ba508ef858da7125700c9d8c3e2656850ab1b777d4b8b8a770",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "verify",
+          "status": "behavioral_failure",
+          "reward": 0
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\npanic: range evaluation diverged from the float control\n\thistogram: {\"resultType\":\"matrix\",\"result\":[{\"metric\":{\"case\":\"monotonic\"},\"values\":[[1791546705,\"0.75\"],[1791546720,\"1.5\"],[1791546735,\"2.25\"],[1791546750,\"3\"]]}]}\n\tfloat: {\"resultType\":\"matrix\",\"result\":[{\"metric\":{\"case\":\"monotonic\"},\"values\":[[1791546690,\"0\"],[1791546705,\"0.75\"],[1791546720,\"1.5\"],[1791546735,\"2.25\"],[1791546750,\"3\"]]}]}\n\ngoroutine 1 [running]:\nmain.main()\n\tgithub.com/prometheus/prometheus/micro1-controller.M3jUSd/main.go:433 +0x1257\n"
+      }
+    },
+    {
+      "task": "histogram-rate-semantics",
+      "attempt": 2,
+      "job": "live-env-cal2t-1010-histogram-rate-semantics-luna-02",
+      "reward": 0.0,
+      "candidate_sha256": "34fdc6e389cb9e7420d8e14b890565af3e68e183d7428c36158118410a4d970a",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "verify",
+          "status": "behavioral_failure",
+          "reward": 0
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\npanic: counter reset anchored diverged from the float control\n\thistogram: {\"resultType\":\"vector\",\"result\":[{\"metric\":{\"case\":\"reset\"},\"value\":[1791547470,\"-90\"]}]}\n\tfloat: {\"resultType\":\"vector\",\"result\":[{\"metric\":{\"case\":\"reset\"},\"value\":[1791547470,\"372\"]}]}\n\ngoroutine 1 [running]:\nmain.main()\n\tgithub.com/prometheus/prometheus/micro1-controller.YvuXVN/main.go:421 +0x1277\n"
+      }
+    },
+    {
+      "task": "start-timestamp-persistence",
+      "attempt": 1,
+      "job": "live-env-cal2t-1010-start-timestamp-persistence-luna-01",
+      "reward": 0.0,
+      "candidate_sha256": "875e66655666db3830ce080beac9ff46d15c16f7b41ed8c0325443c71afc7f2e",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "verify",
+          "status": "behavioral_failure",
+          "reward": 0
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\npanic: candidate produced no durable block\n\ngoroutine 1 [running]:\nmain.run({0x7fff8b6b2eb8?, 0x15?}, {0x7fff8b6b2ecf?, 0xca8de0?}, {0x7fff8b6b2f0c?, 0x2671dae9f9e0?}, {0xe2afb0?, 0xb4948e?}, 0xc0?, 0x1, ...)\n\tgithub.com/prometheus/prometheus/micro1-controller.NYay8N/main.go:407 +0x165\nmain.main()\n\tgithub.com/prometheus/prometheus/micro1-controller.NYay8N/main.go:912 +0x307\n"
+      }
+    },
+    {
+      "task": "start-timestamp-persistence",
+      "attempt": 2,
+      "job": "live-env-cal2t-1010-start-timestamp-persistence-luna-02",
+      "reward": 0.0,
+      "candidate_sha256": "1e10d9df729bf06c772cc5ad986d328fed7e4cbc8abf1cb4e2ccbc059aab8972",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "reward.txt": 0,
+        "status.json": {
+          "phase": "verify",
+          "status": "behavioral_failure",
+          "reward": 0
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\npanic: candidate reader did not recover the complete expected histogram sample\n\ngoroutine 1 [running]:\nmain.requireExact({0x3d5b82578000?, 0x4, 0x0?}, {0x3d5b8241c1c0, 0x16?, 0x4?}, 0x1)\n\tgithub.com/prometheus/prometheus/micro1-controller.ncHmW5/main.go:472 +0x206\nmain.requireResult({0x1, {0x3d5b82578000, 0x4, 0x4}, 0x3d5b8249fb20, 0x1, 0x27e}, {0x3d5b8241c1c0, 0x4, 0x4}, ...)\n\tgithub.com/prometheus/prometheus/micro1-controller.ncHmW5/main.go:484 +0xb2\nmain.main()\n\tgithub.com/prometheus/prometheus/micro1-controller.ncHmW5/main.go:913 +0x40d\n"
+      }
+    },
+    {
+      "task": "thanos-cache-reuse",
+      "attempt": 1,
+      "job": "live-env-cal2e-1010-thanos-cache-reuse-luna-01",
+      "reward": 0.0,
+      "candidate_sha256": "d8a503d22dd870c021378a4b119f4b7f77479fae78e30f353782ee1e682cde66",
+      "grading_recovered": false,
+      "verifier_outputs": {
+        "behavior.json": {
+          "checks": [
+            {
+              "name": "cold_compatible_lookup_read_bound",
+              "passed": true
+            },
+            {
+              "name": "divisible_grids",
+              "passed": false,
+              "error": "15->60 made downstream requests"
+            },
+            {
+              "name": "incompatible_grids",
+              "passed": true
+            },
+            {
+              "name": "partial_coverage",
+              "passed": false,
+              "error": "cached prefix was unnecessarily refetched"
+            },
+            {
+              "name": "ordinary_subrange_float",
+              "passed": false,
+              "error": "narrowing discarded ordinary cached coverage"
+            },
+            {
+              "name": "ordinary_single_point_float",
+              "passed": true
+            },
+            {
+              "name": "ordinary_subrange_histogram",
+              "passed": false,
+              "error": "narrowing discarded ordinary cached coverage"
+            },
+            {
+              "name": "ordinary_single_point_histogram",
+              "passed": false,
+              "error": "narrowing discarded ordinary cached coverage"
+            },
+            {
+              "name": "ordinary_hit_with_partial_dense_entry",
+              "passed": true
+            },
+            {
+              "name": "missing_final_timestamp_float",
+              "passed": true
+            },
+            {
+              "name": "missing_final_timestamp_histogram",
+              "passed": true
+            },
+            {
+              "name": "window_growth_float",
+              "passed": true
+            },
+            {
+              "name": "window_growth_histogram",
+              "passed": true
+            },
+            {
+              "name": "request_isolation",
+              "passed": true
+            },
+            {
+              "name": "native_histograms",
+              "passed": false,
+              "error": "histogram fallback still reaches downstream"
+            },
+            {
+              "name": "series_identity",
+              "passed": false,
+              "error": "labeled series fallback still reaches downstream"
+            },
+            {
+              "name": "empty_results",
+              "passed": false,
+              "error": "empty cached result not reused"
+            },
+            {
+              "name": "concurrent_reuse",
+              "passed": false,
+              "error": "warm concurrent lookups missed"
+            },
+            {
+              "name": "split_boundary",
+              "passed": false,
+              "error": "split boundary lost compatible cache coverage"
+            },
+            {
+              "name": "frontend_replacement",
+              "passed": false,
+              "error": "compatible reuse did not survive frontend replacement"
+            },
+            {
+              "name": "domain_steps_1_5",
+              "passed": false,
+              "error": "1->5 made downstream requests"
+            },
+            {
+              "name": "domain_steps_10_20",
+              "passed": false,
+              "error": "10->20 made downstream requests"
+            },
+            {
+              "name": "domain_steps_120_600",
+              "passed": false,
+              "error": "120->600 made downstream requests"
+            },
+            {
+              "name": "domain_steps_300_900",
+              "passed": false,
+              "error": "300->900 made downstream requests"
+            },
+            {
+              "name": "domain_steps_600_1800",
+              "passed": false,
+              "error": "600->1800 made downstream requests"
+            },
+            {
+              "name": "domain_steps_900_3600",
+              "passed": false,
+              "error": "900->3600 made downstream requests"
+            },
+            {
+              "name": "domain_steps_1800_7200",
+              "passed": false,
+              "error": "1800->7200 made downstream requests"
+            },
+            {
+              "name": "domain_steps_3600_10800",
+              "passed": false,
+              "error": "3600->10800 made downstream requests"
+            },
+            {
+              "name": "domain_steps_10800_21600",
+              "passed": false,
+              "error": "10800->21600 made downstream requests"
+            },
+            {
+              "name": "domain_steps_21600_43200",
+              "passed": false,
+              "error": "21600->43200 made downstream requests"
+            }
+          ],
+          "downstream_receipts": [
+            {
+              "query": [
+                "vector(time() + 41054633271584)"
+              ],
+              "start": [
+                "1701907200"
+              ],
+              "end": [
+                "1702080000"
+              ],
+              "step": [
+                "43200"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 20887)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 20887)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21811)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "20"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21811)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21810)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21810)"
+              ],
+              "start": [
+                "1702080007"
+              ],
+              "end": [
+                "1702080607"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21809)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080300"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21809)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 26913)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 26913)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080060"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 26913)"
+              ],
+              "start": [
+                "1702080300"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 26914)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time()+26914)"
+              ],
+              "start": [
+                "1702080300"
+              ],
+              "end": [
+                "1702080300"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_narrow_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_narrow_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080060"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_narrow_20812"
+              ],
+              "start": [
+                "1702080300"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_single_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_single_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080240"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_single_20812"
+              ],
+              "start": [
+                "1702080360"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 26513)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 26513)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080120"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 29913)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080300"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 29913)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080360"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_tail_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080300"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_tail_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080360"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21593)"
+              ],
+              "start": [
+                "1702080300"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21593)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21593)"
+              ],
+              "start": [
+                "1702080660"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_window_20812"
+              ],
+              "start": [
+                "1702080300"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_window_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_window_20812"
+              ],
+              "start": [
+                "1702080660"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21808)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21808)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "b"
+            },
+            {
+              "query": [
+                "vector(time() + 21808)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "label_replace(vector(time() + 21693), \"instance\", \"east\", \"\", \"\") or label_replace(vector(time() + 21694), \"instance\", \"west\", \"\", \"\")"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "label_replace(vector(time() + 21693), \"instance\", \"east\", \"\", \"\") or label_replace(vector(time() + 21694), \"instance\", \"west\", \"\", \"\")"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "label_replace(vector(time() + 21693), \"instance\", \"east\", \"\", \"\") or label_replace(vector(time() + 21694), \"instance\", \"west\", \"\", \"\")"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_missing_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_missing_20812"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21807)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21807)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21807)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "300"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21807)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21807)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "120"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21807)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21807)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702081800"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21806)"
+              ],
+              "start": [
+                "1702166100"
+              ],
+              "end": [
+                "1702166385"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21806)"
+              ],
+              "start": [
+                "1702166400"
+              ],
+              "end": [
+                "1702166700"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21806)"
+              ],
+              "start": [
+                "1702166100"
+              ],
+              "end": [
+                "1702166340"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21806)"
+              ],
+              "start": [
+                "1702166400"
+              ],
+              "end": [
+                "1702166700"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21695)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 21695)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080600"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 22818)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080020"
+              ],
+              "step": [
+                "1"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 22818)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080020"
+              ],
+              "step": [
+                "5"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 22842)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080080"
+              ],
+              "step": [
+                "10"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 22842)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702080080"
+              ],
+              "step": [
+                "20"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 23532)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702082400"
+              ],
+              "step": [
+                "120"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 23532)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702082400"
+              ],
+              "step": [
+                "600"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 24012)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702083600"
+              ],
+              "step": [
+                "300"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 24012)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702083600"
+              ],
+              "step": [
+                "900"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 25212)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702087200"
+              ],
+              "step": [
+                "600"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 25212)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702087200"
+              ],
+              "step": [
+                "1800"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 27312)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702094400"
+              ],
+              "step": [
+                "900"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 27312)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702094400"
+              ],
+              "step": [
+                "3600"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 31812)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702108800"
+              ],
+              "step": [
+                "1800"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 31812)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702108800"
+              ],
+              "step": [
+                "7200"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 37212)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702123200"
+              ],
+              "step": [
+                "3600"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 37212)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702123200"
+              ],
+              "step": [
+                "10800"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 55212)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702166400"
+              ],
+              "step": [
+                "10800"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 55212)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702166400"
+              ],
+              "step": [
+                "21600"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 87612)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702144800"
+              ],
+              "step": [
+                "21600"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 87612)"
+              ],
+              "start": [
+                "1702166400"
+              ],
+              "end": [
+                "1702252800"
+              ],
+              "step": [
+                "21600"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 87612)"
+              ],
+              "start": [
+                "1702080000"
+              ],
+              "end": [
+                "1702123200"
+              ],
+              "step": [
+                "43200"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 87612)"
+              ],
+              "start": [
+                "1702166400"
+              ],
+              "end": [
+                "1702252800"
+              ],
+              "step": [
+                "43200"
+              ],
+              "tenant": "a"
+            }
+          ],
+          "cache_read_receipts": [
+            {
+              "name": "cold_compatible_lookup_read_bound",
+              "start": 1701907200,
+              "end": 1702080000,
+              "step": 43200,
+              "memcached_version": "VERSION 1.6.18",
+              "retrieval_commands": [
+                {
+                  "command": "gets",
+                  "key_count": 1
+                }
+              ],
+              "remote_read_commands": 1,
+              "downstream_requests": 1,
+              "recorder_errors": []
+            }
+          ],
+          "passed": false
+        },
+        "reward.txt": 0,
+        "status.json": {
+          "status": "behavioral_failure"
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\n"
+      }
+    },
+    {
+      "task": "thanos-cache-reuse",
+      "attempt": 2,
+      "job": "live-env-cal2e-1010-thanos-cache-reuse-luna-02",
+      "reward": 0.0,
+      "candidate_sha256": "c90318a895306157c3b6f18f44ced1e4a1f04f36ce1cb3e79795c413499c1a47",
+      "grading_recovered": true,
+      "verifier_outputs": {
+        "behavior.json": {
+          "checks": [
+            {
+              "name": "cold_compatible_lookup_read_bound",
+              "passed": true
+            },
+            {
+              "name": "divisible_grids",
+              "passed": true
+            },
+            {
+              "name": "incompatible_grids",
+              "passed": false,
+              "error": "[[1707782400, '1707865928'], [1707782460, '1707865988'], [1707782520, '1707866048'], [1707782580, '1707866108'], [1707782640, '1707866168'], [1707782700, '1707866228'], [1707782760, '1707866288'], [1707782820, '1707866348'], [1707782880, '1707866408'], [1707782940, '1707866468'], [1707783000, '1707866528']]"
+            },
+            {
+              "name": "partial_coverage",
+              "passed": true
+            },
+            {
+              "name": "ordinary_subrange_float",
+              "passed": true
+            },
+            {
+              "name": "ordinary_single_point_float",
+              "passed": true
+            },
+            {
+              "name": "ordinary_subrange_histogram",
+              "passed": true
+            },
+            {
+              "name": "ordinary_single_point_histogram",
+              "passed": true
+            },
+            {
+              "name": "ordinary_hit_with_partial_dense_entry",
+              "passed": true
+            },
+            {
+              "name": "missing_final_timestamp_float",
+              "passed": true
+            },
+            {
+              "name": "missing_final_timestamp_histogram",
+              "passed": true
+            },
+            {
+              "name": "window_growth_float",
+              "passed": false,
+              "error": "[[1707782400, '1707865710'], [1707782460, '1707865770'], [1707782520, '1707865830'], [1707782580, '1707865890'], [1707782640, '1707865950'], [1707782700, '1707866010'], [1707782760, '1707866070'], [1707782820, '1707866130'], [1707782880, '1707866190'], [1707782940, '1707866250'], [1707783000, '1707866310']]"
+            },
+            {
+              "name": "window_growth_histogram",
+              "passed": false,
+              "error": "[{'metric': {'series': 'histogram'}, 'histograms': [[1707782400, {'count': '1', 'sum': '2', 'buckets': [[0, '0', '4', '1']]}], [1707782460, {'count': '61', 'sum': '122', 'buckets': [[0, '0', '4', '61']]}], [1707782520, {'count': '121', 'sum': '242', 'buckets': [[0, '0', '4', '121']]}], [1707782580, {'count': '181', 'sum': '362', 'buckets': [[0, '0', '4', '181']]}], [1707782640, {'count': '241', 'sum': '482', 'buckets': [[0, '0', '4', '241']]}], [1707782700, {'count': '301', 'sum': '602', 'buckets': [[0, '0', '4', '301']]}], [1707782760, {'count': '361', 'sum': '722', 'buckets': [[0, '0', '4', '361']]}], [1707782820, {'count': '421', 'sum': '842', 'buckets': [[0, '0', '4', '421']]}], [1707782880, {'count': '481', 'sum': '962', 'buckets': [[0, '0', '4', '481']]}], [1707782940, {'count': '541', 'sum': '1082', 'buckets': [[0, '0', '4', '541']]}], [1707783000, {'count': '601', 'sum': '1202', 'buckets': [[0, '0', '4', '601']]}]]}]"
+            },
+            {
+              "name": "request_isolation",
+              "passed": true
+            },
+            {
+              "name": "native_histograms",
+              "passed": true
+            },
+            {
+              "name": "series_identity",
+              "passed": true
+            },
+            {
+              "name": "empty_results",
+              "passed": true
+            },
+            {
+              "name": "concurrent_reuse",
+              "passed": true
+            },
+            {
+              "name": "split_boundary",
+              "passed": true
+            },
+            {
+              "name": "frontend_replacement",
+              "passed": true
+            },
+            {
+              "name": "domain_steps_1_5",
+              "passed": true
+            },
+            {
+              "name": "domain_steps_10_20",
+              "passed": true
+            },
+            {
+              "name": "domain_steps_120_600",
+              "passed": true
+            },
+            {
+              "name": "domain_steps_300_900",
+              "passed": true
+            },
+            {
+              "name": "domain_steps_600_1800",
+              "passed": true
+            },
+            {
+              "name": "domain_steps_900_3600",
+              "passed": true
+            },
+            {
+              "name": "domain_steps_1800_7200",
+              "passed": true
+            },
+            {
+              "name": "domain_steps_3600_10800",
+              "passed": true
+            },
+            {
+              "name": "domain_steps_10800_21600",
+              "passed": true
+            },
+            {
+              "name": "domain_steps_21600_43200",
+              "passed": true
+            }
+          ],
+          "downstream_receipts": [
+            {
+              "query": [
+                "vector(time() + 137396185541324)"
+              ],
+              "start": [
+                "1707609600"
+              ],
+              "end": [
+                "1707782400"
+              ],
+              "step": [
+                "43200"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 82604)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707784200"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 82609)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707784200"
+              ],
+              "step": [
+                "20"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 82564)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707784200"
+              ],
+              "step": [
+                "5"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 82679)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707784200"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 82889)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707784200"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "20"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782670"
+              ],
+              "end": [
+                "1707782670"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782970"
+              ],
+              "end": [
+                "1707782970"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782490"
+              ],
+              "end": [
+                "1707782490"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782550"
+              ],
+              "end": [
+                "1707782550"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782430"
+              ],
+              "end": [
+                "1707782430"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782790"
+              ],
+              "end": [
+                "1707782790"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782910"
+              ],
+              "end": [
+                "1707782910"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782850"
+              ],
+              "end": [
+                "1707782850"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782610"
+              ],
+              "end": [
+                "1707782610"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83528)"
+              ],
+              "start": [
+                "1707782730"
+              ],
+              "end": [
+                "1707782730"
+              ],
+              "step": [
+                "30"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83526)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707782700"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83526)"
+              ],
+              "start": [
+                "1707782760"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 88630)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 88631)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time()+88631)"
+              ],
+              "start": [
+                "1707782700"
+              ],
+              "end": [
+                "1707782700"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_narrow_82529"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_single_82529"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 88230)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 88230)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707782520"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 91630)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707782700"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 91630)"
+              ],
+              "start": [
+                "1707782760"
+              ],
+              "end": [
+                "1707782760"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_tail_82529"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707782700"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_tail_82529"
+              ],
+              "start": [
+                "1707782760"
+              ],
+              "end": [
+                "1707782760"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83310)"
+              ],
+              "start": [
+                "1707782700"
+              ],
+              "end": [
+                "1707784200"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83310)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707782640"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_window_82529"
+              ],
+              "start": [
+                "1707782700"
+              ],
+              "end": [
+                "1707784200"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_window_82529"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707782640"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83525)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83525)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "b"
+            },
+            {
+              "query": [
+                "vector(time() + 83525)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "60"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_hist_82529"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "label_replace(vector(time() + 83410), \"instance\", \"east\", \"\", \"\") or label_replace(vector(time() + 83411), \"instance\", \"west\", \"\", \"\")"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "micro1_missing_82529"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83524)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707784200"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83523)"
+              ],
+              "start": [
+                "1707868500"
+              ],
+              "end": [
+                "1707868785"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83523)"
+              ],
+              "start": [
+                "1707868800"
+              ],
+              "end": [
+                "1707869100"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 83412)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707783000"
+              ],
+              "step": [
+                "15"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 84535)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707782420"
+              ],
+              "step": [
+                "1"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 84559)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707782480"
+              ],
+              "step": [
+                "10"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 85249)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707784800"
+              ],
+              "step": [
+                "120"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 85729)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707786000"
+              ],
+              "step": [
+                "300"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 86929)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707789600"
+              ],
+              "step": [
+                "600"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 89029)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707796800"
+              ],
+              "step": [
+                "900"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 93529)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707811200"
+              ],
+              "step": [
+                "1800"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 98929)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707825600"
+              ],
+              "step": [
+                "3600"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 116929)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707868800"
+              ],
+              "step": [
+                "10800"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 149329)"
+              ],
+              "start": [
+                "1707782400"
+              ],
+              "end": [
+                "1707847200"
+              ],
+              "step": [
+                "21600"
+              ],
+              "tenant": "a"
+            },
+            {
+              "query": [
+                "vector(time() + 149329)"
+              ],
+              "start": [
+                "1707868800"
+              ],
+              "end": [
+                "1707955200"
+              ],
+              "step": [
+                "21600"
+              ],
+              "tenant": "a"
+            }
+          ],
+          "cache_read_receipts": [
+            {
+              "name": "cold_compatible_lookup_read_bound",
+              "start": 1707609600,
+              "end": 1707782400,
+              "step": 43200,
+              "memcached_version": "VERSION 1.6.18",
+              "retrieval_commands": [
+                {
+                  "command": "gets",
+                  "key_count": 1
+                },
+                {
+                  "command": "gets",
+                  "key_count": 16
+                }
+              ],
+              "remote_read_commands": 2,
+              "downstream_requests": 1,
+              "recorder_errors": []
+            }
+          ],
+          "passed": false
+        },
+        "reward.txt": 0,
+        "status.json": {
+          "status": "behavioral_failure"
+        },
+        "test-stdout.txt": "/app/verifier-artifacts/candidate.tar.gz: OK\n"
+      }
+    }
+  ],
+  "controls": {
+    "final_thanos_endpoints": [
+      {
+        "job": "live-env-cal2t-thanos-endpoint-oracle",
+        "reward": 1,
+        "passed": 30,
+        "total": 30,
+        "endpoint_checks": [
+          {
+            "name": "missing_final_timestamp_float",
+            "passed": true
+          },
+          {
+            "name": "missing_final_timestamp_histogram",
+            "passed": true
+          }
+        ],
+        "result": "jobs/live-env-cal2t-thanos-endpoint-oracle/thanos-cache-reuse__AhP2xgW/result.json"
+      },
+      {
+        "job": "live-env-cal2t-thanos-endpoint-nop",
+        "reward": 0,
+        "passed": 12,
+        "total": 30,
+        "endpoint_checks": [
+          {
+            "name": "missing_final_timestamp_float",
+            "passed": true
+          },
+          {
+            "name": "missing_final_timestamp_histogram",
+            "passed": true
+          }
+        ],
+        "result": "jobs/live-env-cal2t-thanos-endpoint-nop/thanos-cache-reuse__tMrbVwr/result.json"
+      },
+      {
+        "job": "live-env-cal2t-thanos-endpoint-replay02",
+        "reward": 0,
+        "passed": 28,
+        "total": 30,
+        "endpoint_checks": [
+          {
+            "name": "missing_final_timestamp_float",
+            "passed": false,
+            "error": "[[1706659200, '1706743917'], [1706659260, '1706743977'], [1706659320, '1706744037'], [1706659380, '1706744097'], [1706659440, '1706744157'], [1706659500, '1706744217']]"
+          },
+          {
+            "name": "missing_final_timestamp_histogram",
+            "passed": false,
+            "error": "[{'metric': {'series': 'histogram'}, 'histograms': [[1706659200, {'count': '1', 'sum': '2', 'buckets': [[0, '0', '4', '1']]}], [1706659260, {'count': '61', 'sum': '122', 'buckets': [[0, '0', '4', '61']]}], [1706659320, {'count': '121', 'sum': '242', 'buckets': [[0, '0', '4', '121']]}], [1706659380, {'count': '181', 'sum': '362', 'buckets': [[0, '0', '4', '181']]}], [1706659440, {'count': '241', 'sum': '482', 'buckets': [[0, '0', '4', '241']]}], [1706659500, {'count': '301', 'sum': '602', 'buckets': [[0, '0', '4', '301']]}]]}]"
+          }
+        ],
+        "result": "jobs/live-env-cal2t-thanos-endpoint-replay02/thanos-cache-reuse__bSHWMKq/result.json"
+      }
+    ]
+  },
+  "package_file_sha256": {
+    "unix-socket-scraping": {
+      "instruction.md": "9e9178ec07b5e9366e364e808236810b7299cb615a578df47da4dd8b8d10e14d",
+      "task.toml": "aa3cb8604e180a0b7f45affadc3932dd5c31df2d06f44b39df6d5506c844d741",
+      "tests/controller.go": "f22b6c13aa2a8d4c4666a2c2299f05c1d85946c7ff98dec6037a69845cb51528",
+      "tests/hidden_pool_identity_test.go": "20f9f65b28f9616dd446c50bb00919eb2627c0f7050d3eda40ecc05ed130cdf1",
+      "tests/Dockerfile": "9f87de3557f38b0a7f6b981ed422cc936d7efc4f0c1f7b52f247ad9989dbcd9a",
+      "tests/hidden_client_retirement_test.go": "377f96f355b0647cdc1d243645e82074f9181a93f4e39ab4b60924885ceee3f1",
+      "tests/test.sh": "e59427adab6254001d2bebed9b97f8c00dabd4a17c9dbd8729bcc9946a0d9be3",
+      "solution/fix.patch": "6bf890eb9e8325d93d28e4ecf09fec4ac33d0afd7306e7d0da7733797155a52c",
+      "solution/solve.sh": "63745dbd55f4e5e8dbbcfefcd209ec2cc8422f98fcd6add0be12be2b4d0f35d3",
+      "solution/fix-isolation.patch": "9f651bf2151cff1e89ab22f80c4f8410ff22958660314855456aa57c9d569f7f",
+      "environment/Dockerfile": "141d2eed7afe7f4831fb77190ef514b4ebba1ae988766a06d70cb0fa67cb8a86",
+      "environment/source/SOURCE.SHA256SUMS": "43ef1d661580c91bcab38cf30ffc87bc708e3cead7b7e8e0e3adc0a719396aeb",
+      "environment/source/PREWARM_PACKAGES": "0246c081438ec28c5a8c2e2a4f253d22bb05b8566da782fb1aa68953e884da58",
+      "environment/source/prometheus-source.tar.gz": "3f014fbedbdecbd18207b01e9deabba6a393bdb01e32765f64cab65fdfc2aff0",
+      "environment/runtime/ENVIRONMENT.md": "242df3ffd604d88c7d0755fbcdb6b7a15477eec62c6357fe321bd6dc17c3c427",
+      "environment/runtime/task-env": "2d4e25f9ba5fcd747807ae419f2c0f131104a377195904fda88fbc2b3b008f2b",
+      "environment/runtime/profile": "19858aa9f73f2323f91ef5d0817eae66828155be8eb6f9c8fe81fabfded7cdc0",
+      "environment/runtime/seed.go": "e506a37485440dea08778cbc3bb8cfa520625afe4f38a6c0fe4be7d357824027",
+      "environment/runtime/exporters.py": "4a69c3a404c211010112eb3824de10556789f5a19f379be25ea585b342ed65bf",
+      "environment/runtime/boot.sh": "96c588e40577b77449311503759f0b20b6c59def4634c812a9bf57cb3dac8b93",
+      "environment/build/diagnose.sh": "0d75c924dae9fce4a21c311f6dea5255526450343d69551cb908e7d0567e7252",
+      "environment/build/build-candidate.sh": "00a968b6f8e0e8ff61e262c233eaafc40103cd185a9f741eddd9c8bb27a8427c",
+      "environment/build/verify-source.sh": "55cec6cdaaffcaaed757a27924de3c5697ae9f5c59af3fbec70dfc4e484b41c8",
+      "tests/source/prometheus-source.tar.gz": "3f014fbedbdecbd18207b01e9deabba6a393bdb01e32765f64cab65fdfc2aff0",
+      "tests/common/prepare-candidate.sh": "f9ed5f722c170a8000ca3b1ed8302f6aaf81bd72ab2e2ea66362f3d571de47a0",
+      "tests/common/hardened-run.sh": "695d9c747ddd16e9733740485103bab6e12965db6c71c613de6099bc7e69573e",
+      "tests/common/run-candidate.sh": "661006943edbf7e9fcb41ff8fff29ed57603d15d017ae3babd182da70607cee6"
+    },
+    "prometheus-subquery-semantics": {
+      "instruction.md": "a190052e70a4354fb561da25d1af0f86bfeb738f9e61e9d341c80d9e85ee9f81",
+      "task.toml": "5721a21406057f6e0d21ed35afc84c6f91550b6faee62c039d92ef8f317a9e73",
+      "tests/controller.go": "ee2c481063a8c8b2dc0c665e93d0f2f6eb0ce5508792fbe37853cc67b4d876e7",
+      "tests/evaluation_probe.go": "2f34fd357a3b7b6625ec7c2f221af96cb04f17c1e51cca52c64b5d4fd78abd20",
+      "tests/Dockerfile": "bb3869a3078926610d2e376a2930a062e61ac84e25c0ff414f6293ba79b884bf",
+      "tests/test.sh": "aa435a2404b6997ce222e37f62bb5fc15bbad7b00453918b290201c383130307",
+      "solution/fix.patch": "d573ebc1e6ae6836b669e855748ff06b6f904168757bf5ddbbaa88ade9f6afd9",
+      "solution/solve.sh": "696dbbadfc54c63f5dc7ba3f2fd7a2ff012467f1743854f42fd5f584c5fc388d",
+      "environment/Dockerfile": "141d2eed7afe7f4831fb77190ef514b4ebba1ae988766a06d70cb0fa67cb8a86",
+      "environment/source/SOURCE.SHA256SUMS": "12cf47e34cd1d18d4bdd9d7b54af48754293088a3c54b370d67cdeee853de163",
+      "environment/source/PREWARM_PACKAGES": "35bca14c6442eafa4dbb8d180b24e5540f0f6e00bce7abca81fe82218e0ae4de",
+      "environment/source/prometheus-source.tar.gz": "218bec9b497ea44d5aad97b86e5c5a598bba50999020b4af5c9492ae01d5b334",
+      "environment/runtime/ENVIRONMENT.md": "65d02abbd25adf31cd991a8bad16c3b64dee79f995c76a3a0b60683ae080bf3d",
+      "environment/runtime/task-env": "2d4e25f9ba5fcd747807ae419f2c0f131104a377195904fda88fbc2b3b008f2b",
+      "environment/runtime/profile": "24f25e9dc43b17043eba60637c03ac0d5144d858c8529e317dc89684cb563558",
+      "environment/runtime/seed.go": "e506a37485440dea08778cbc3bb8cfa520625afe4f38a6c0fe4be7d357824027",
+      "environment/runtime/exporters.py": "4a69c3a404c211010112eb3824de10556789f5a19f379be25ea585b342ed65bf",
+      "environment/runtime/boot.sh": "96c588e40577b77449311503759f0b20b6c59def4634c812a9bf57cb3dac8b93",
+      "environment/build/diagnose.sh": "0d75c924dae9fce4a21c311f6dea5255526450343d69551cb908e7d0567e7252",
+      "environment/build/build-candidate.sh": "00a968b6f8e0e8ff61e262c233eaafc40103cd185a9f741eddd9c8bb27a8427c",
+      "environment/build/verify-source.sh": "55cec6cdaaffcaaed757a27924de3c5697ae9f5c59af3fbec70dfc4e484b41c8",
+      "tests/source/prometheus-source.tar.gz": "218bec9b497ea44d5aad97b86e5c5a598bba50999020b4af5c9492ae01d5b334",
+      "tests/common/prepare-candidate.sh": "f9ed5f722c170a8000ca3b1ed8302f6aaf81bd72ab2e2ea66362f3d571de47a0",
+      "tests/common/hardened-run.sh": "695d9c747ddd16e9733740485103bab6e12965db6c71c613de6099bc7e69573e",
+      "tests/common/run-candidate.sh": "661006943edbf7e9fcb41ff8fff29ed57603d15d017ae3babd182da70607cee6"
+    },
+    "stale-wal-expiry": {
+      "instruction.md": "7aec2c3068009e718b7aeee92069004b1e059b948542dc47113fa645ebbb7fd6",
+      "task.toml": "e48563d108e27de191daba9fee6d5429cb83ac938d162645a917d2eceb792570",
+      "tests/trusted_reader.go": "dee46eef95947d54f5880ec94419a3c5a3c2bbbc9a51a1b3fb84df0e41c3dbf9",
+      "tests/hidden_wal_expiry_test.go": "91dc7d19474765cd9887685714080a9423b26d0a6b054c509697d5ab84ff68ab",
+      "tests/controller.go": "2290301fa98dbc84ec6cd4b19187c4b24ab374152cefbfd6036ff4e9e903d93d",
+      "tests/Dockerfile": "bbc37c05dfb5489c047521cf2d6fd53c5a6fd8b4327a7f4a2039b504ec5596ad",
+      "tests/candidate_program.go": "bef20e6394f0542311aeec8ae85bcaef3e79125b18c8a35187f380868ff80e61",
+      "tests/test.sh": "8513b8df66ba4a7caba7b42eb32a8cdd9a2eecdd30699209d3547807a70bfd9e",
+      "solution/fix.patch": "e15878720599a9d3dc8bdec942fdad6b43e630b268ad4127e8da7eec5fea70ee",
+      "solution/solve.sh": "745b3d3f727b97b93859bc05634a63553bb19977de2c8937a5d6874320ea1aea",
+      "environment/Dockerfile": "141d2eed7afe7f4831fb77190ef514b4ebba1ae988766a06d70cb0fa67cb8a86",
+      "environment/source/SOURCE.SHA256SUMS": "cb0d06b278b68b891e4e64b361cc363ff92ab1994a911a92c462fda059f43c4c",
+      "environment/source/PREWARM_PACKAGES": "a3ba360021bbf5982f5b08b6f8faa5cdb235ab0e25fcc0efb94cf063af39eae5",
+      "environment/source/prometheus-source.tar.gz": "ed12931b2819c6159f50eb24960e78f505a4bdf32974a3717305c809d8019929",
+      "environment/runtime/STORAGE.md": "e7a4112f448297e2947e4a79cfabb2fa3446b71ba461c8e86b4f4fc0f98027fa",
+      "environment/runtime/ENVIRONMENT.md": "65d02abbd25adf31cd991a8bad16c3b64dee79f995c76a3a0b60683ae080bf3d",
+      "environment/runtime/storage-demo.go": "76825e7ba44d1af997f8bc7946d73e6d3fdc89520ce870dd42aaa7167f2bcd4e",
+      "environment/runtime/task-env": "2d4e25f9ba5fcd747807ae419f2c0f131104a377195904fda88fbc2b3b008f2b",
+      "environment/runtime/profile": "006958241488494bdfc77b3adc9ae671d47f1a5d316d42268b36fe758f58b963",
+      "environment/runtime/seed.go": "e506a37485440dea08778cbc3bb8cfa520625afe4f38a6c0fe4be7d357824027",
+      "environment/runtime/exporters.py": "4a69c3a404c211010112eb3824de10556789f5a19f379be25ea585b342ed65bf",
+      "environment/runtime/boot.sh": "96c588e40577b77449311503759f0b20b6c59def4634c812a9bf57cb3dac8b93",
+      "environment/build/diagnose.sh": "0d75c924dae9fce4a21c311f6dea5255526450343d69551cb908e7d0567e7252",
+      "environment/build/build-candidate.sh": "00a968b6f8e0e8ff61e262c233eaafc40103cd185a9f741eddd9c8bb27a8427c",
+      "environment/build/verify-source.sh": "55cec6cdaaffcaaed757a27924de3c5697ae9f5c59af3fbec70dfc4e484b41c8",
+      "tests/source/prometheus-source.tar.gz": "ed12931b2819c6159f50eb24960e78f505a4bdf32974a3717305c809d8019929",
+      "tests/common/prepare-candidate.sh": "f9ed5f722c170a8000ca3b1ed8302f6aaf81bd72ab2e2ea66362f3d571de47a0",
+      "tests/common/hardened-run.sh": "695d9c747ddd16e9733740485103bab6e12965db6c71c613de6099bc7e69573e",
+      "tests/common/run-candidate.sh": "661006943edbf7e9fcb41ff8fff29ed57603d15d017ae3babd182da70607cee6"
+    },
+    "victoriametrics-fill-modifiers": {
+      "instruction.md": "0f11b61db2629742e9c8b179d5599efb802c995073a56e84ac79390f045ffe78",
+      "task.toml": "620123b3c1a2eecfe1a795b2fde1d1ef513fddb1dccc4b51fb58d1978cf55440",
+      "tests/controller.py": "f7fcf81798093a807c8214f61e781402d8e3313fc6951ae0708a228ce3525144",
+      "tests/Dockerfile": "7bbc877e845f4aebc0c2c3114206bdf1a50285dae8f00f68aac8a51d6d0b4c8b",
+      "tests/test.sh": "583ac4fc8e9c37baafddaa80c1a4c415ecb868bbbd7f4f8e1055237c87735f15",
+      "tests/prepare.py": "e25a09d473df985fa764c50aac25faaaa4cb30e705b38a9a392d60619a8ac77b",
+      "solution/fix.patch": "11c7a99d075128c2771509b7ae6d5d2a36152173e820962a190478e2ae5287a6",
+      "solution/solve.sh": "1ea4f3b336a4164f1245621f9a173013e9a8b96cd0aa36a44ef5e3d3548608e0",
+      "environment/Dockerfile": "428ea9bc550aeafc882337c2ec8bdf578c5d9302b683ef1adff99b5a86451d7b",
+      "environment/source/victoriametrics-source.tar.gz": "cf802f0aa8174af4898f315d014d9c89973af6061ba2617923b51921b4d2a91e",
+      "environment/source/SHA256SUMS": "1128a193302ca415c2f6c483eb70471ee1d2f0771cddb86d738e14447f24823a",
+      "environment/runtime/ENVIRONMENT.md": "17fad1d4d3129e803ce9458837521e228dcb44b1b653078c7d4241d1b3d5f255",
+      "environment/runtime/task-env": "2bb646c4c898871c4ae350be764dfe0e3034a88bc834bbff7cebee24e6d8c366",
+      "environment/runtime/boot.sh": "fedef840819365568c666a39575c029f595f743cba4927b82073473b3bbcf6cb",
+      "tests/source/victoriametrics-source.tar.gz": "cf802f0aa8174af4898f315d014d9c89973af6061ba2617923b51921b4d2a91e",
+      "tests/source/SHA256SUMS": "1128a193302ca415c2f6c483eb70471ee1d2f0771cddb86d738e14447f24823a"
+    },
+    "histogram-rate-semantics": {
+      "instruction.md": "ab68f0029d1d812994f9a1e6e8eb612b0512899c5afd1a1fe336682f729141cc",
+      "task.toml": "4433210836b1cae4c1a516acfdbb41bf30d13eab7ef3998f4b8b8e025fa632bd",
+      "tests/controller.go": "7dfdadf91545462808c9594bfd551efbf93b31bada034a5c2dde72815408f9e3",
+      "tests/Dockerfile": "8da9178953626cc50bb68aba44eb1ab48eaf450f76042289a9c2a69b02e013c4",
+      "tests/hidden_histogram_rate_test.go": "421603bfc33b301ccc0624551c039f7a2ce534546866f315df3312e96738338f",
+      "tests/test.sh": "95ebfb98429c68ab5634645c506cdb6faf412c8c639af1c05b0b1aa2551b0541",
+      "solution/fix.patch": "841c534ff42aca28abd74ca32e19c2532d64bee9a1e8e92fbb3a3f59469b8cb4",
+      "solution/fix-18943.patch": "e27f697618ebccd1689cb6dab1926fbe6ac722f049e1f789640638aef70607c5",
+      "solution/solve.sh": "b6f82b55228b9ad70da35275348efea6ca544675e1f240a666df0357a93bb1ba",
+      "environment/Dockerfile": "141d2eed7afe7f4831fb77190ef514b4ebba1ae988766a06d70cb0fa67cb8a86",
+      "environment/source/SOURCE.SHA256SUMS": "4a88055b1c3d02282d831d9f52d41b76e8271a167086cd7dea1e44e501460119",
+      "environment/source/PREWARM_PACKAGES": "35bca14c6442eafa4dbb8d180b24e5540f0f6e00bce7abca81fe82218e0ae4de",
+      "environment/source/prometheus-source.tar.gz": "9683e773587c96fa1e396cd83e53985fcd408789b964b7aab03f30e47d7be951",
+      "environment/runtime/ENVIRONMENT.md": "65d02abbd25adf31cd991a8bad16c3b64dee79f995c76a3a0b60683ae080bf3d",
+      "environment/runtime/task-env": "2d4e25f9ba5fcd747807ae419f2c0f131104a377195904fda88fbc2b3b008f2b",
+      "environment/runtime/profile": "4ef5e40996cbc5f7da447303fccfa64ce19e11ff6aecef04bf73147b1df8281d",
+      "environment/runtime/seed.go": "e506a37485440dea08778cbc3bb8cfa520625afe4f38a6c0fe4be7d357824027",
+      "environment/runtime/boot.sh": "96c588e40577b77449311503759f0b20b6c59def4634c812a9bf57cb3dac8b93",
+      "environment/build/diagnose.sh": "0d75c924dae9fce4a21c311f6dea5255526450343d69551cb908e7d0567e7252",
+      "environment/build/build-candidate.sh": "00a968b6f8e0e8ff61e262c233eaafc40103cd185a9f741eddd9c8bb27a8427c",
+      "environment/build/verify-source.sh": "55cec6cdaaffcaaed757a27924de3c5697ae9f5c59af3fbec70dfc4e484b41c8",
+      "tests/source/prometheus-source.tar.gz": "9683e773587c96fa1e396cd83e53985fcd408789b964b7aab03f30e47d7be951",
+      "tests/common/prepare-candidate.sh": "f9ed5f722c170a8000ca3b1ed8302f6aaf81bd72ab2e2ea66362f3d571de47a0",
+      "tests/common/hardened-run.sh": "695d9c747ddd16e9733740485103bab6e12965db6c71c613de6099bc7e69573e",
+      "tests/common/run-candidate.sh": "661006943edbf7e9fcb41ff8fff29ed57603d15d017ae3babd182da70607cee6"
+    },
+    "start-timestamp-persistence": {
+      "instruction.md": "b3c943548886b7b43a2bf30c544030e6a7561b9c02c024b2355c3e0784b16109",
+      "task.toml": "cecca082a4645aa4816a2228c36709c850bb9eeb894412b9afa59bd9ff3d8f41",
+      "tests/controller.go": "9351c088dfa141e2a5648fda436732f46abf1b295b99d817c7d7648f83e4f7dc",
+      "tests/candidate_reader.go": "3db9b6020503cb06f6dbb9ba453d1170fbcd2b30947acf29fda51017a4fecd49",
+      "tests/Dockerfile": "3951e67dbc9a4af505a0c096e8ebcad8a6e92c9a72af7b132ae00027d68f26fd",
+      "tests/legacy_writer.go": "09ea21b7a893d27bd76d11032726e0622b9445537f16b3429ca4932c952eb16b",
+      "tests/candidate_program.go": "24288b3d812e5b11f93552360b04e7e2455b37a6c81d583146ab6e94962df107",
+      "tests/build-storage-probe.sh": "4b113df882495c1135de58c7ddcafacab392038dbba53fb8b41c192c94cf547a",
+      "tests/oracle.patch": "38ef116cef20d074d89110f544974c4733478043a50a4dec3feade7c4f6f744c",
+      "tests/test.sh": "09aa83f02c4c5c95cbde14852fa1dd003530257f9b837ab9d96f1619cbd01959",
+      "tests/feature_bridge.go": "24ec9d726dd62319322c5102673d84fe5e4238562d440c340b8d7b01fb9150b6",
+      "tests/oracle_reader.go": "3b83f46f96bc4a7b2e27c1f26bb5cb8c0def541e911fdcc74f93a6347a88e5c8",
+      "solution/fix.patch": "38ef116cef20d074d89110f544974c4733478043a50a4dec3feade7c4f6f744c",
+      "solution/solve.sh": "a9cba46987c39fc8deeaaf9910e9068d1724241f3829366b2f09372aa9a18d90",
+      "environment/Dockerfile": "a06a71139b2ed980b1b08e726d9e10440e9bdfd72e9ff6b92edb5453c8e18184",
+      "environment/histogram-st-format.md": "19bb2f0d3fd18fd99895e81370775a1e1333f8101cfd5fd9025c385321052db6",
+      "environment/source/SOURCE.SHA256SUMS": "7096c879c2ee38e9a4ffc40ca022c4248c4677a29fe7177beb7dcebd054d7cd6",
+      "environment/source/PREWARM_PACKAGES": "9a031aacde0351c615b78825f398b56abc0679af83fd7a6868300d7c527a5395",
+      "environment/source/prometheus-source.tar.gz": "3d7da00af107e9979a0769da59410b9fade61aa8ebc5920d7ed71315b652f906",
+      "environment/runtime/STORAGE.md": "e3860480ed61d92708fa7a8226e13b092b2fe255d2fb5a380a285f415e882764",
+      "environment/runtime/ENVIRONMENT.md": "65d02abbd25adf31cd991a8bad16c3b64dee79f995c76a3a0b60683ae080bf3d",
+      "environment/runtime/storage-demo.go": "afb827e93e0f17c5557bc1636c802dc864785169adef7c375f26031026fa2588",
+      "environment/runtime/task-env": "2d4e25f9ba5fcd747807ae419f2c0f131104a377195904fda88fbc2b3b008f2b",
+      "environment/runtime/profile": "3d6e4dda0bb44ede5372cb26b4a497196b189471b2748a684f5f2eede496ca57",
+      "environment/runtime/build-storage-demo.sh": "35ee30fd327fbff5742276d0ee5ec9ba42dbb3f7de1b41237d83c6df3ffe8e67",
+      "environment/runtime/seed.go": "e506a37485440dea08778cbc3bb8cfa520625afe4f38a6c0fe4be7d357824027",
+      "environment/runtime/feature-bridge.go": "e05c2fdb55d6253b8a1edce57a6f9886c84a9568ddcecac61dbf48db702ef98d",
+      "environment/runtime/exporters.py": "4a69c3a404c211010112eb3824de10556789f5a19f379be25ea585b342ed65bf",
+      "environment/runtime/boot.sh": "96c588e40577b77449311503759f0b20b6c59def4634c812a9bf57cb3dac8b93",
+      "environment/build/diagnose.sh": "0d75c924dae9fce4a21c311f6dea5255526450343d69551cb908e7d0567e7252",
+      "environment/build/build-candidate.sh": "00a968b6f8e0e8ff61e262c233eaafc40103cd185a9f741eddd9c8bb27a8427c",
+      "environment/build/verify-source.sh": "55cec6cdaaffcaaed757a27924de3c5697ae9f5c59af3fbec70dfc4e484b41c8",
+      "tests/source/prometheus-source.tar.gz": "3d7da00af107e9979a0769da59410b9fade61aa8ebc5920d7ed71315b652f906",
+      "tests/common/prepare-candidate.sh": "f9ed5f722c170a8000ca3b1ed8302f6aaf81bd72ab2e2ea66362f3d571de47a0",
+      "tests/common/hardened-run.sh": "695d9c747ddd16e9733740485103bab6e12965db6c71c613de6099bc7e69573e",
+      "tests/common/run-candidate.sh": "661006943edbf7e9fcb41ff8fff29ed57603d15d017ae3babd182da70607cee6"
+    },
+    "thanos-cache-reuse": {
+      "instruction.md": "02089902679d9da2d1cc3e1b7c755ea209fb0fa726b698c178a9c7e7d7a99da9",
+      "task.toml": "1fd36434bfe88a2ca84654312cf1cc4ee9cffdcb8a1019c802a34ac844a853ff",
+      "tests/controller.py": "ceaaa0f46e29f92d017bb58e52af9b89d2d26996ca247e84d24033678f1b77fd",
+      "tests/Dockerfile": "5b5dee603704a0cfbe50243fc4f9621dec83c79b8da4aa4aaa90be8eb28aa652",
+      "tests/test.sh": "2a074c1b241181afc29ed115a016932ef4a0c61a2fd7c71ea5f5c51ebb976651",
+      "solution/fix.patch": "15e9743797d17df01642dcc217667c26031d82ae99063281824205fe80faeac1",
+      "solution/solve.sh": "f5c6710d000ec26b5ffd628fbcbedf0b21678a78e5af27b84c660a8c38b7ef9e",
+      "environment/Dockerfile": "e1f351295415ffe05903eb7812c92efd5ebd81503b9419e93470d03d60f5c370",
+      "environment/playground/task-env": "7883f6bedacdcce8c1c12a668dce00fee4855ac5d0faf68a8d7bed6ff498f104",
+      "environment/playground/README.md": "a8d6b5deb648866cc0aecd91ad84560ed7addfd08bb332d36156a6ad26f9ea04",
+      "environment/playground/seed.go": "04190da26eef13a65d1074d7857f0f912e590a44e327a7aa8ebe6cb67f53e050",
+      "environment/playground/prometheus.yml": "08ea4fccda564e5afd5e2e400051c0e6cc34d0bc06f3b553d814c75c26138a54",
+      "environment/source/SOURCE.SHA256SUMS": "03ebc06b84640a8f0d697e092cdaabd51dde86a0722dc12f8cbf2a433f0a64aa",
+      "environment/source/thanos-source.tar.gz": "4e1d5b27d067735836484aff775207bfc3c8a2ed66d61ccc5be384f06a534927",
+      "tests/source/thanos-source.tar.gz": "4e1d5b27d067735836484aff775207bfc3c8a2ed66d61ccc5be384f06a534927",
+      "tests/common/prepare-candidate.sh": "5d3d15bd53b57baffa399a293777730b37fe7a8d2118d86ff9868b267a197429",
+      "tests/common/hardened-run.sh": "695d9c747ddd16e9733740485103bab6e12965db6c71c613de6099bc7e69573e",
+      "tests/common/run-candidate.sh": "661006943edbf7e9fcb41ff8fff29ed57603d15d017ae3babd182da70607cee6"
+    }
+  },
+  "recovery": {
+    "note": "Thanos attempt 02 completed solving before a local runner interruption. Its saved submission was graded separately.",
+    "archive_sha256": "c90318a895306157c3b6f18f44ced1e4a1f04f36ce1cb3e79795c413499c1a47",
+    "identical_file_contents": 1252
+  },
+  "limits": [
+    "Two attempts per task do not establish a stable success rate.",
+    "Passing check counts do not measure percentage of engineering completion.",
+    "Visible trajectories showed no solution retrieval; shell networking was possible and some outputs were truncated.",
+    "Manual reviews and Harbor analyses were performed; the full raw trajectories and advisory reports are retained locally, not duplicated here."
+  ]
+}

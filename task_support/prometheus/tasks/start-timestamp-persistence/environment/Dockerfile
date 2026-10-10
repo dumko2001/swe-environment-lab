@@ -9,10 +9,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
     GOPROXY=https://proxy.golang.org,direct \
     GOSUMDB=sum.golang.org \
     GOCACHE=/opt/micro1-go-build-cache \
-    PROMETHEUS_ROOT=/app/prometheus
+    PROMETHEUS_ROOT=/app/prometheus GOMAXPROCS=4 GOFLAGS="-p=4"
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl git patch \
+    && apt-get install -y --no-install-recommends ca-certificates curl git patch python3 openssl procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Keep reviewer-only provenance out of the actor image.
@@ -23,6 +23,8 @@ RUN chmod 0555 /usr/local/bin/verify-prometheus-source \
     && /usr/local/bin/verify-prometheus-source \
       /opt/prometheus-input \
       /app/prometheus
+
+COPY histogram-st-format.md /app/histogram-st-format.md
 
 WORKDIR /app/prometheus
 
@@ -44,5 +46,14 @@ RUN useradd --create-home --uid 1000 --shell /bin/bash agent \
     && mkdir -p /app/verifier-artifacts /app/bin \
     && chown -R agent:agent /app/verifier-artifacts /app/bin
 
+COPY runtime/ /opt/task-runtime/
+RUN mkdir -p /app/task-runtime/bin && GOWORK=off go build -o /app/task-runtime/bin/prometheus ./cmd/prometheus && GOWORK=off go build -o /app/task-runtime/bin/seed /opt/task-runtime/seed.go \
+    && if test -f /opt/task-runtime/storage-demo.go; then GOWORK=off sh /opt/task-runtime/build-storage-demo.sh /app/prometheus /app/task-runtime/bin/storage-demo; fi \
+    && chmod +x /opt/task-runtime/task-env /opt/task-runtime/boot.sh \
+    && ln -s /opt/task-runtime/task-env /usr/local/bin/task-env \
+    && ln -s /opt/task-runtime/ENVIRONMENT.md /app/ENVIRONMENT.md \
+    && chown -R agent:agent /app/task-runtime /opt/task-runtime
+RUN ln -s /usr/local/go/bin/go /usr/local/bin/go && ln -s /usr/local/go/bin/gofmt /usr/local/bin/gofmt
 USER root
+ENTRYPOINT ["/opt/task-runtime/boot.sh"]
 CMD ["sleep", "infinity"]

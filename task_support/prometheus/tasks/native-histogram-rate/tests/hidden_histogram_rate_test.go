@@ -184,6 +184,30 @@ eval instant at 45s histogram_count(mixed_schema smoothed)
   expect warn msg: PromQL warning: vector contains a mix of histograms with exponential and custom buckets schemas for metric name "mixed_schema"
 
 clear
+load 20s
+  distribution {{schema:0 count:10 sum:20 z_bucket:1 z_bucket_w:0.001 buckets:[2 3] n_buckets:[4]}} {{schema:0 count:20 sum:40 z_bucket:2 z_bucket_w:0.001 buckets:[4 6] n_buckets:[8]}}
+  distribution_gauge {{schema:0 count:10 sum:20 z_bucket:1 z_bucket_w:0.001 buckets:[2 3] n_buckets:[4] counter_reset_hint:gauge}} {{schema:0 count:20 sum:40 z_bucket:2 z_bucket_w:0.001 buckets:[4 6] n_buckets:[8] counter_reset_hint:gauge}}
+  custom_distribution {{schema:-53 count:10 sum:20 custom_values:[1 5] buckets:[2 3 5]}} {{schema:-53 count:20 sum:40 custom_values:[1 5] buckets:[4 6 10]}}
+
+eval instant at 10s distribution smoothed
+  {__name__="distribution"} {{schema:0 count:15 sum:30 z_bucket:1.5 z_bucket_w:0.001 buckets:[3 4.5] n_buckets:[6]}}
+
+eval instant at 15s increase(distribution[10s] smoothed)
+  {} {{schema:0 count:5 sum:10 z_bucket:0.5 z_bucket_w:0.001 buckets:[1 1.5] n_buckets:[2] counter_reset_hint:gauge}}
+
+eval instant at 15s rate(distribution[10s] smoothed)
+  {} {{schema:0 count:0.5 sum:1 z_bucket:0.05 z_bucket_w:0.001 buckets:[0.1 0.15] n_buckets:[0.2] counter_reset_hint:gauge}}
+
+eval instant at 15s delta(distribution_gauge[10s] smoothed)
+  {} {{schema:0 count:5 sum:10 z_bucket:0.5 z_bucket_w:0.001 buckets:[1 1.5] n_buckets:[2] counter_reset_hint:gauge}}
+
+eval instant at 10s custom_distribution smoothed
+  {__name__="custom_distribution"} {{schema:-53 count:15 sum:30 custom_values:[1 5] buckets:[3 4.5 7.5]}}
+
+eval instant at 15s increase(custom_distribution[10s] smoothed)
+  {} {{schema:-53 count:5 sum:10 custom_values:[1 5] buckets:[1 1.5 2.5] counter_reset_hint:gauge}}
+
+clear
 load 30s
   mixed_types 1 2 {{schema:0 sum:3 count:3 buckets:[3]}} {{schema:0 sum:4 count:4 buckets:[4]}}
 

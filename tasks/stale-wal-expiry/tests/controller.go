@@ -5,9 +5,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 )
 
 func token() string {
@@ -18,12 +20,18 @@ func token() string {
 	return hex.EncodeToString(b)
 }
 
-type readResult struct {
-	Checkpoint map[string]bool `json:"checkpoint"`
-	Queryable  map[string]bool `json:"queryable"`
+type storedSample struct {
+	T    int64  `json:"t"`
+	Bits uint64 `json:"bits"`
 }
 
-func run(candidate, reader, selected, active string, maxt, target int64) readResult {
+type readResult struct {
+	Samples    map[string][]storedSample `json:"samples"`
+	Checkpoint map[string]bool           `json:"checkpoint"`
+	Queryable  map[string]bool           `json:"queryable"`
+}
+
+func run(candidate, reader, selected, active string, maxt, target int64, values [3]float64) readResult {
 	root, err := os.MkdirTemp("/tmp/micro1-verifier-tmp", "wal-state-")
 	if err != nil {
 		panic(err)
@@ -33,7 +41,7 @@ func run(candidate, reader, selected, active string, maxt, target int64) readRes
 		panic(err)
 	}
 	launcher := os.Getenv("MICRO1_CANDIDATE_LAUNCHER")
-	cmd := exec.Command(launcher, candidate, "/tmp/micro1-verifier-tmp", root, selected, active, fmt.Sprint(maxt), fmt.Sprint(target))
+	cmd := exec.Command(launcher, candidate, "/tmp/micro1-verifier-tmp", root, selected, active, fmt.Sprint(maxt), fmt.Sprint(target), fmt.Sprint(values[0]), fmt.Sprint(values[1]), fmt.Sprint(values[2]))
 	if output, err := cmd.CombinedOutput(); err != nil {
 		panic(fmt.Sprintf("candidate failed: %v: %s", err, output))
 	}
@@ -45,6 +53,20 @@ func run(candidate, reader, selected, active string, maxt, target int64) readRes
 	result := readResult{}
 	if err := json.Unmarshal(output, &result); err != nil {
 		panic(err)
+	}
+	wantSelected := []storedSample{{T: maxt - 100, Bits: math.Float64bits(values[0])}, {T: maxt, Bits: 0x7ff0000000000002}}
+	if !reflect.DeepEqual(result.Samples[selected], wantSelected) {
+		panic(fmt.Sprintf("compacted samples changed: got %v want %v", result.Samples[selected], wantSelected))
+	}
+	wantLatest := storedSample{T: maxt + 100, Bits: math.Float64bits(values[2])}
+	activeSamples := result.Samples[active]
+	// Head truncation may remove the pre-cutoff sample. If retained in a chunk,
+	// it must still have its exact original timestamp and value.
+	if len(activeSamples) == 2 && activeSamples[0] == (storedSample{T: maxt - 100, Bits: math.Float64bits(values[1])}) {
+		activeSamples = activeSamples[1:]
+	}
+	if !reflect.DeepEqual(activeSamples, []storedSample{wantLatest}) {
+		panic(fmt.Sprintf("active samples changed: got %v", result.Samples[active]))
 	}
 	return result
 }
@@ -65,14 +87,15 @@ func main() {
 	active := "active_" + token()
 	maxt := int64(10000 + int(token()[0]))
 
-	atBoundary := run(candidate, reader, selected, active, maxt, maxt)
+	values := [3]float64{float64(13 + int(token()[0])), float64(211 + int(token()[0])), float64(419 + int(token()[0]))}
+	atBoundary := run(candidate, reader, selected, active, maxt, maxt, values)
 	if !atBoundary.Checkpoint[selected] || !atBoundary.Checkpoint[active] {
 		panic("inclusive checkpoint boundary violated")
 	}
 	if !atBoundary.Queryable[selected] || !atBoundary.Queryable[active] {
 		panic("clean-parent replay lost compacted or active data at the inclusive boundary")
 	}
-	afterBoundary := run(candidate, reader, selected, active, maxt, maxt+1)
+	afterBoundary := run(candidate, reader, selected, active, maxt, maxt+1, values)
 	if afterBoundary.Checkpoint[selected] || !afterBoundary.Checkpoint[active] {
 		panic("checkpoint expiry or active control violated")
 	}

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net"
 	"net/http"
 	"net/url"
@@ -111,10 +112,67 @@ func requireEqual(name string, left, right json.RawMessage) error {
 	if err := json.Unmarshal(right, &b); err != nil {
 		return err
 	}
-	if !reflect.DeepEqual(a, b) {
+	if !equalQueryData(a, b) {
 		return fmt.Errorf("%s mismatch\nleft: %s\nright: %s", name, left, right)
 	}
 	return nil
+}
+
+// equalQueryData compares query sample values with the same float64 tolerance
+// as independently computed expectations. Timestamps, label strings, result
+// shapes and all other response fields remain exact.
+func equalQueryData(a, b any) bool {
+	switch left := a.(type) {
+	case map[string]any:
+		right, ok := b.(map[string]any)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for key, value := range left {
+			other, exists := right[key]
+			if !exists || !equalQueryData(value, other) {
+				return false
+			}
+		}
+		return true
+	case []any:
+		right, ok := b.([]any)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		// Prometheus encodes a float sample as [timestamp, "value"].
+		if len(left) == 2 {
+			lt, leftTimestamp := left[0].(float64)
+			rt, rightTimestamp := right[0].(float64)
+			lv, leftValue := left[1].(string)
+			rv, rightValue := right[1].(string)
+			if leftTimestamp && rightTimestamp && leftValue && rightValue {
+				if lt != rt {
+					return false
+				}
+				x, xerr := strconv.ParseFloat(lv, 64)
+				y, yerr := strconv.ParseFloat(rv, 64)
+				if xerr != nil || yerr != nil {
+					return false
+				}
+				if math.IsNaN(x) || math.IsNaN(y) {
+					return math.IsNaN(x) && math.IsNaN(y)
+				}
+				if math.IsInf(x, 0) || math.IsInf(y, 0) {
+					return x == y
+				}
+				return math.Abs(x-y) <= 1e-10*math.Max(1, math.Max(math.Abs(x), math.Abs(y)))
+			}
+		}
+		for index, value := range left {
+			if !equalQueryData(value, right[index]) {
+				return false
+			}
+		}
+		return true
+	default:
+		return reflect.DeepEqual(a, b)
+	}
 }
 
 func requireNonEmpty(name string, data json.RawMessage) error {
@@ -145,7 +203,11 @@ func requireMatrix(name string, data json.RawMessage, metricName string, baseTim
 		return fmt.Errorf("%s returned the wrong matrix shape: %s", name, data)
 	}
 	series := decoded.Result[0]
-	if metricName != "" && series.Metric["__name__"] != metricName {
+	wantLabels := map[string]string{}
+	if metricName != "" {
+		wantLabels["__name__"] = metricName
+	}
+	if !reflect.DeepEqual(series.Metric, wantLabels) {
 		return fmt.Errorf("%s returned the wrong metric identity: %s", name, data)
 	}
 	if len(series.Values) != len(values) {
@@ -167,8 +229,8 @@ func requireMatrix(name string, data json.RawMessage, metricName string, baseTim
 		if err != nil {
 			return err
 		}
-		if timestamp != float64(baseTime+int64(index*30)) || value != values[index] {
-			return fmt.Errorf("%s point %d mismatch: %s", name, index, pair)
+		if timestamp != float64(baseTime+int64(index*30)) || math.IsNaN(value) || math.IsInf(value, 0) || math.Abs(value-values[index]) > 1e-10*math.Max(1, math.Abs(values[index])) {
+			return fmt.Errorf("%s point %d mismatch: got=%s expected_timestamp=%d expected_value=%.17g", name, index, pair, baseTime+int64(index*30), values[index])
 		}
 	}
 	return nil
@@ -340,6 +402,42 @@ func main() {
 	}
 	referenceData, err := queryRange(baseURL, pairs[0].direct, start, end, "30")
 	if err != nil {
+		panic(err)
+	}
+	// Compute the quantiles independently: comparing two candidate query paths
+	// alone would accept a regression shared by both paths.
+	population := []float64{float64(metricBase), float64(metricBase + 4), float64(metricBase + 10), float64(metricBase + 18), float64(metricBase + 28)}
+	// Parentheses preserve a standalone fixed subquery's matrix semantics.
+	// Check values independently as well as comparing the equivalent forms.
+	for _, wrap := range []string{"%s", "(%s)", "((%s))"} {
+		expression := fmt.Sprintf(wrap, valueMetric+"[121s:30s] @ "+fixed)
+		data, err := instant(baseURL, expression, start)
+		if err != nil {
+			panic(fmt.Sprintf("standalone fixed subquery %s: %v", expression, err))
+		}
+		if err := requireMatrix("standalone fixed subquery", data, valueMetric, baseTime, population); err != nil {
+			panic(err)
+		}
+	}
+	quantiles := make([]float64, 4)
+	for i := range quantiles {
+		q := float64(((i+argOffset)%9)+1) / 10
+		rank := q * float64(len(population)-1)
+		lower := int(math.Floor(rank))
+		weight := rank - float64(lower)
+		quantiles[i] = population[lower]*(1-weight) + population[lower+1]*weight
+	}
+	if err := requireMatrix("independent fixed quantiles", referenceData, "", baseTime, quantiles); err != nil {
+		panic(err)
+	}
+	invariantValue := metricBase*3 + 7
+	invariantChild := "quantile_over_time(scalar(" + argMetric + "), vector(" + strconv.Itoa(invariantValue) + ")[121s:30s] @ " + fixed + ")"
+	invariantData, err := queryRange(baseURL, invariantChild, start, end, "30")
+	if err != nil {
+		panic(fmt.Sprintf("fixed expression within fixed subquery: %v", err))
+	}
+	constantValues := []float64{float64(invariantValue), float64(invariantValue), float64(invariantValue), float64(invariantValue)}
+	if err := requireMatrix("fixed expression within fixed subquery", invariantData, "", baseTime, constantValues); err != nil {
 		panic(err)
 	}
 	if err := requireEqual("nested fixed subquery", referenceData, nestedData); err != nil {

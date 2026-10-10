@@ -19,6 +19,7 @@ else
 fi
 
 cp /tests/hidden_pool_identity_test.go "$work/prometheus/scrape/micro1_pool_identity_test.go"
+cp /tests/hidden_client_retirement_test.go "$work/prometheus/scrape/micro1_client_retirement_test.go"
 if ! /tests/common/hardened-run.sh compile "$work/prometheus" scrape scrape "$binary" "$proof" \
   || ! /tests/common/hardened-run.sh compile-program "$work/prometheus" ./cmd/prometheus "$candidate" \
   || ! /tests/common/hardened-run.sh compile-controller /tests/controller.go "$controller"; then
@@ -30,7 +31,7 @@ fi
 
 if /tests/common/hardened-run.sh run-controller "$controller" "$runtime" "$candidate" "$runtime" \
   && /tests/common/hardened-run.sh run "$binary" "$runtime/scrape" \
-    '^(TestMicro1UnixSocketPoolIdentity|TestZZZZMicro1VerifierProof)$' "$proof"; then
+    '^(TestMicro1UnixSocketPoolIdentity|TestMicro1UnixSocketCallerDialOption|TestMicro1UnixSocketClientRetirement|TestZZZZMicro1VerifierProof)$' "$proof"; then
   reward=1
   status=passed
 else

@@ -1,5 +1,5 @@
-Experimental extended-range queries work for floats but reject native histograms. A bare `mixed_types smoothed` instant query can also terminate the query even though wrapping the same selector in `sort(...)` returns a normal warning.
+Can you extend anchored and smoothed rate, increase and delta to native histograms, and support smoothed histogram selectors too? They currently only work for floats.
 
-Add native-histogram support for anchored and smoothed rate, increase, delta, and smoothed selectors.
+Also, a bare `mixed_types smoothed` instant query can terminate the query, while wrapping it in `sort(...)` gives a normal warning. Please fix that as part of this.
 
 Do not look for or use online solutions.

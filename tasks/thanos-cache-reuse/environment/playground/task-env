@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Manage only this task's public local service processes."""
+import fcntl,json,os,pathlib,signal,socket,subprocess,sys,time,urllib.request,urllib.parse
+ROOT=pathlib.Path('/var/lib/task-env')
+BIN='/opt/task-env/bin'
+if os.geteuid()==0:
+    os.execvp('runuser',['runuser','-u','agent','--',__file__,*sys.argv[1:]])
+ROOT.mkdir(exist_ok=True)
+lock=open(ROOT/'control.lock','w'); fcntl.flock(lock,fcntl.LOCK_EX)
+cache='type: MEMCACHED\nconfig:\n  addresses: [127.0.0.1:11211]\n  timeout: 1s\n  expiration: 1h\n'
+services={
+ 'memcached':['memcached','-l','127.0.0.1','-p','11211','-m','32','-U','0'],
+ 'prometheus':[BIN+'/prometheus','--config.file=/opt/task-env/prometheus.yml','--storage.tsdb.path='+str(ROOT/'prometheus'),'--storage.tsdb.retention.time=30d','--storage.tsdb.min-block-duration=2h','--storage.tsdb.max-block-duration=2h','--web.listen-address=127.0.0.1:9090','--web.enable-remote-write-receiver','--enable-feature=native-histograms'],
+ 'sidecar':[BIN+'/thanos','sidecar','--prometheus.url=http://127.0.0.1:9090','--tsdb.path='+str(ROOT/'prometheus'),'--http-address=127.0.0.1:10902','--grpc-address=127.0.0.1:10901'],
+ 'query':[BIN+'/thanos','query','--http-address=127.0.0.1:10904','--grpc-address=127.0.0.1:10903','--endpoint=127.0.0.1:10901'],
+ 'frontend':[BIN+'/thanos','query-frontend','--http-address=127.0.0.1:10906','--query-frontend.downstream-url=http://127.0.0.1:10904','--no-query-range.align-range-with-step','--query-range.split-interval=24h','--query-range.response-cache-max-freshness=0s','--query-range.response-cache-config='+cache],
+}
+def pid(name):
+ try:
+  p=int((ROOT/(name+'.pid')).read_text()); cmd=pathlib.Path(f'/proc/{p}/cmdline').read_bytes().split(b'\0')
+  if cmd[0].decode() != services[name][0] and not (name=='memcached' and cmd[0].decode().endswith('/memcached')): return None
+  if name in ('sidecar','query','frontend') and cmd[1].decode()!=services[name][1]:return None
+  return p
+ except (OSError,ValueError,IndexError): return None
+
+def stop(names):
+ for name in reversed(list(names)):
+  p=pid(name)
+  if p:
+   os.kill(p,signal.SIGTERM)
+   for _ in range(100):
+    if not pid(name):break
+    time.sleep(.1)
+   if pid(name):raise RuntimeError(name+' did not stop; inspect logs')
+  (ROOT/(name+'.pid')).unlink(missing_ok=True)
+
+def get(url):
+ with urllib.request.urlopen(url,timeout=2) as r:return r.read()
+
+def ready(port):
+ for _ in range(180):
+  try:get(f'http://127.0.0.1:{port}/-/ready');return
+  except Exception:time.sleep(.5)
+ raise RuntimeError(f'port {port} not ready; task-env logs')
+
+def start():
+ for name,args in services.items():
+  if not pid(name):
+   with open(ROOT/(name+'.log'),'ab') as log:
+    p=subprocess.Popen(args,stdout=log,stderr=log,stdin=subprocess.DEVNULL,start_new_session=True)
+   (ROOT/(name+'.pid')).write_text(str(p.pid))
+  if name=='memcached':
+   for attempt in range(50):
+    try:
+     with socket.create_connection(('127.0.0.1',11211),timeout=1) as conn:
+      conn.sendall(b'version\r\n')
+      if not conn.recv(256).startswith(b'VERSION '):raise RuntimeError('Invalid Memcached response')
+     break
+    except (OSError,RuntimeError):
+     if attempt==49:raise RuntimeError('Memcached not ready; task-env logs')
+     time.sleep(.1)
+  if name=='prometheus':
+   ready(9090)
+   if not (ROOT/'seed.json').exists():subprocess.run([BIN+'/seed'],check=True)
+ for port in (10902,10904,10906):ready(port)
+ seed=json.loads((ROOT/'seed.json').read_text())
+ for _ in range(90):
+  try:
+   for query in ('playground_requests_total','playground_latency_seconds'):
+    result=json.loads(get('http://127.0.0.1:10906/api/v1/query?'+urllib.parse.urlencode({'query':query,'time':seed['end']})))
+    assert result['status']=='success' and result['data']['result'],result
+   print('Ready: real Prometheus → Sidecar → Query → Query Frontend + Memcached');return
+  except Exception:time.sleep(1)
+ raise RuntimeError('Seed data not queryable through frontend; task-env logs')
+cmd=sys.argv[1] if len(sys.argv)>1 else 'status'
+if cmd=='start':start()
+elif cmd=='stop':stop(services)
+elif cmd=='restart':stop(services);start()
+elif cmd=='rebuild':
+ subprocess.run(['go','build','-o',BIN+'/thanos.next','./cmd/thanos'],cwd='/app/thanos',check=True)
+ stop(('sidecar','query','frontend'));os.replace(BIN+'/thanos.next',BIN+'/thanos');start()
+elif cmd=='reset-data':
+ import shutil
+ stop(services);shutil.rmtree(ROOT/'prometheus',ignore_errors=True);(ROOT/'seed.json').unlink(missing_ok=True);start()
+elif cmd=='logs':
+ for name in services:
+  p=ROOT/(name+'.log');print('\n== '+name+' ==\n'+ ('\n'.join(p.read_text(errors='replace').splitlines()[-40:]) if p.exists() else '(not started)'))
+elif cmd=='status':
+ for name in services:print(name,pid(name) or 'stopped')
+ if (ROOT/'seed.json').exists():print('Sample query timestamps:',(ROOT/'seed.json').read_text())
+ if not all(pid(n) for n in services):sys.exit(1)
+else:sys.exit('usage: task-env start|status|logs|rebuild|restart|reset-data|stop')

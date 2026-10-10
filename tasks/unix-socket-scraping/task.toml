@@ -2,11 +2,12 @@ schema_version = "1.0"
 artifacts = ["/app/verifier-artifacts/candidate.tar.gz", "/app/verifier-artifacts/candidate.sha256"]
 
 [metadata]
+author_organization = "Not specified"
 author_name = "Sidharth Rajmohan"
 author_email = "micro1@example.invalid"
-difficulty_explanation = "The feature crosses target relabeling, request construction, TLS identity, keep-alive pooling, reload, and fail-closed behavior. A Prometheus networking maintainer must preserve ordinary scraping while preventing cross-target transport reuse. The source is the exact clean parent of the upstream Unix-socket feature, and the verifier's randomized local exporters reproduce the HTTP, TLS, pooling, reload, and fallback behavior exercised by that feature and its direct correction; they are synthetic fixtures, not production telemetry."
+difficulty_explanation = "A Prometheus maintainer is adding support for exporters reachable only through local Unix sockets. Humans and agents must trace how target labels become requests and reused connections, because two exporters can advertise the same address but live on different sockets. A successful change preserves credentials, certificate checks and ordinary network targets through reloads, rather than merely making one scrape succeed. Real upstream source is exercised against controlled HTTP/TLS exporters with synthetic metrics, reproducing production socket identity, authentication and reload behavior."
 solution_explanation = "Recognize the relabeled socket path while preserving the advertised URL authority for HTTP Host and TLS identity, route those targets through a fail-closed Unix dialer, and key or own their HTTP transports so keep-alive connections cannot cross socket or TCP targets. Rebuild the isolated clients when targets reload while leaving ordinary TCP scraping unchanged."
-verification_explanation = "After validating the archived workspace and pinned module files, a separate no-network verifier builds the candidate Prometheus daemon, deletes its source, and runs it non-root. A root-owned controller serves randomized HTTP, HTTPS, Unix-socket, and TCP endpoints, then checks Host and TLS identity, same-authority socket isolation, UDS/TCP separation, reload behavior, ordinary TCP scraping, and fail-closed handling. Missing sockets may be absent or report up=0, but a live TCP trap must receive no request throughout the two-second observation window."
+verification_explanation = "After validating the archived workspace and pinned module files, a separate no-network verifier builds the candidate Prometheus daemon, deletes its source, and runs it non-root. A root-owned controller serves randomized HTTP, HTTPS, Unix-socket, and TCP endpoints, then checks Host and TLS identity, same-authority socket isolation, UDS/TCP separation, reload behavior, ordinary TCP scraping, and fail-closed handling. Missing sockets may be absent or report up=0, but a live TCP trap must receive no request throughout the two-second observation window. An injected behavioral scrape-pool exercise observes accepted Unix/TCP connections, correct endpoint responses, same-socket reuse across logical targets, and changed authentication after reload. It does not require client or transport pointer identity, a particular default hostname, or replacement of an otherwise correctly updated pool. A real Unix HTTP request also verifies that a caller-supplied dial option is invoked, preserving the documented client option contract without requiring a particular client cache. A pinned-runtime weak-reference probe observes retired clients after real socket requests and target removal, accepts released or logically reset state and active shared clients, and confirms that remaining targets on a shared socket keep working. It reads no private cache fields and imposes no connection-close deadline."
 category = "Observability"
 tags = ["prometheus", "scraping", "unix-socket", "tls", "transport-isolation"]
 expert_time_estimate_hours = 3.0
@@ -18,8 +19,8 @@ timeout_sec = 1200.0
 
 [verifier.environment]
 build_timeout_sec = 2400.0
-cpus = 2
-memory_mb = 4096
+cpus = 4
+memory_mb = 8192
 storage_mb = 10240
 gpus = 0
 network_mode = "no-network"
@@ -50,8 +51,14 @@ user = "agent"
 
 [environment]
 build_timeout_sec = 2400.0
-cpus = 2
-memory_mb = 4096
+cpus = 4
+memory_mb = 8192
 storage_mb = 10240
 gpus = 0
 network_mode = "public"
+
+[environment.healthcheck]
+command = "/usr/local/bin/task-env start"
+timeout_sec = 180.0
+interval_sec = 5.0
+retries = 3

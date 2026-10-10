@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"math"
 	"os"
-	"reflect"
 	"strconv"
 
 	"github.com/prometheus/common/promslog"
@@ -170,10 +169,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	optionIndex, err := strconv.Atoi(os.Args[4])
-	if err != nil {
-		panic(err)
-	}
 	histogramEncoding, err := strconv.ParseBool(os.Args[5])
 	if err != nil {
 		panic(err)
@@ -183,28 +178,11 @@ func main() {
 		panic(err)
 	}
 
-	opts := tsdb.DefaultOptions()
+	opts := publicStorageOptions(true, histogramEncoding)
 	opts.EnableSTStorage = true
 	opts.XOR2EncodingAllowed = true
 	opts.FloatChunkEncoding = chunkenc.EncXOR2
 	opts.OutOfOrderTimeWindow = 1000
-	if histogramEncoding {
-		if optionIndex == -2 {
-			field, ok := reflect.TypeOf(*opts).FieldByName("EnableHistogramSTEncoding")
-			if !ok {
-				panic("reference histogram start-timestamp option is missing")
-			}
-			optionIndex = field.Index[0]
-		}
-		if optionIndex < 0 || optionIndex >= reflect.TypeOf(*opts).NumField() {
-			panic("invalid option index")
-		}
-		field := reflect.ValueOf(opts).Elem().Field(optionIndex)
-		if field.Kind() != reflect.Bool || !field.CanSet() || field.Bool() {
-			panic("option is not an independently disabled boolean")
-		}
-		field.SetBool(true)
-	}
 	var q storage.Querier
 	var closeDB func() error
 	if os.Args[6] == "-" {

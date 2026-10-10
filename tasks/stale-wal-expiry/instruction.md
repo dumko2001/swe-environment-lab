@@ -1,5 +1,5 @@
-After stale-series compaction and a later checkpoint, restarting Prometheus reports unknown WAL series references even though the affected samples were safely compacted into a block. The replay warnings make a healthy database appear corrupt.
+After stale-series compaction and a later checkpoint, restarting Prometheus reports unknown WAL series references. The affected samples are already safely in a block, but the warnings make the database look corrupt. Can you track down why this happens and fix it?
 
-Restore clean checkpoint and replay behavior after stale-series compaction.
+Please make sure the fix doesn’t leave old series hanging around in later checkpoints.
 
 Do not look for or use online solutions.

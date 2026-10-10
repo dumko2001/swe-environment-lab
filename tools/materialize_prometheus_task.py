@@ -21,9 +21,13 @@ TASKS = {
 }
 SUITE = tomllib.loads((ROOT / "task_support/prometheus/suite.toml").read_text())
 REGISTRY = {entry["slug"]: entry for entry in SUITE["tasks"]}
+AUTHOR_ONLY_DIRS = {"calibration", "fixtures"}
 ENVIRONMENT_EXCLUDES = {
     Path("README.md"),
     Path("profiles/README.md"),
+}
+TASK_ENVIRONMENT_EXCLUDES = {
+    "native-histogram-rate": {Path("runtime/exporters.py")},
 }
 
 
@@ -67,7 +71,11 @@ def expected_files(task_name: str, overlay: Path) -> dict[str, str]:
                 continue
             if base == ENVIRONMENT and not include_environment_file(path):
                 continue
+            if base == ENVIRONMENT and path.relative_to(base) in TASK_ENVIRONMENT_EXCLUDES.get(task_name, set()):
+                continue
             relative = Path(prefix) / path.relative_to(base)
+            if base == overlay and relative.parts[0] in AUTHOR_ONLY_DIRS:
+                continue
             if prefix == "" and relative.parts[0] == "source":
                 if relative.name != "SOURCE.md":
                     result[(Path("environment") / relative).as_posix()] = file_hash(path)
@@ -112,6 +120,8 @@ def materialize(task_name: str, overlay: Path, destination: Path) -> None:
         if not path.is_file():
             continue
         relative = path.relative_to(overlay)
+        if relative.parts[0] in AUTHOR_ONLY_DIRS:
+            continue
         if relative.parts[0] == "source":
             targets = []
             if relative.name != "SOURCE.md":
@@ -130,6 +140,8 @@ def materialize(task_name: str, overlay: Path, destination: Path) -> None:
             overlay / "solution/fix.patch",
             temporary / "tests/oracle.patch",
         )
+    for relative in TASK_ENVIRONMENT_EXCLUDES.get(task_name, set()):
+        (temporary / "environment" / relative).unlink(missing_ok=True)
     if destination.exists():
         destination.rename(backup)
     try:

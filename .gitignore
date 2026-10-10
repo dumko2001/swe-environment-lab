@@ -6,17 +6,13 @@ auth.json
 .codex/
 .agents/
 jobs/
-submission/private/
-submission/*.zip
+submission/
+dist/
+datavendor/
+.private-eval/
 trajectories/raw/
 recordings/raw/
 tmp/
 *.pdf
 __pycache__/
 *.pyc
-
-# Local submission material.
-docs/VIDEO_SCRIPT.md
-docs/MICRO1_REQUIREMENTS.md
-docs/PUBLISHING.md
-docs/FIRST_TASK_SPEC.md
