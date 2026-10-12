@@ -16,3 +16,8 @@ tmp/
 *.pdf
 __pycache__/
 *.pyc
+
+# Local authoring and validation machinery; not part of the task release.
+/private_eval/
+/tools/
+/.env.example

@@ -26,9 +26,12 @@ compile() {
     chmod 0400 "$proof_file"
   fi
 
-	go_flags=${MICRO1_GOFLAGS:--mod=mod -p=1}
+	# Go selects vendor mode from submitted module/workspace metadata.
+	go_flags=$(printf '%s' "${MICRO1_GOFLAGS:--p=1}" | sed 's/-mod=[^ ]*//g')
+	workspace=off
+	test ! -f "$module/go.work" || workspace="$module/go.work"
 	export GOMAXPROCS=${MICRO1_GOMAXPROCS:-2}
-	if (cd "$module" && CGO_ENABLED=0 GOWORK=off GOFLAGS="$go_flags" go test -c -o "$binary" "./$package_path"); then
+	if (cd "$module" && CGO_ENABLED=0 GOENV=off GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOWORK="$workspace" GOFLAGS="$go_flags" go test -c -o "$binary" "./$package_path"); then
     compile_status=0
   else
     compile_status=$?
@@ -48,9 +51,12 @@ compile_program() {
   package_path=$2
   binary=$3
 
-	go_flags=${MICRO1_GOFLAGS:--mod=mod -p=1}
+	# Go selects vendor mode from submitted module/workspace metadata.
+	go_flags=$(printf '%s' "${MICRO1_GOFLAGS:--p=1}" | sed 's/-mod=[^ ]*//g')
+	workspace=off
+	test ! -f "$module/go.work" || workspace="$module/go.work"
 	export GOMAXPROCS=${MICRO1_GOMAXPROCS:-2}
-	if (cd "$module" && CGO_ENABLED=0 GOWORK=off GOFLAGS="$go_flags" go build \
+	if (cd "$module" && CGO_ENABLED=0 GOENV=off GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOWORK="$workspace" GOFLAGS="$go_flags" go build \
       -trimpath -buildvcs=false -o "$binary" "$package_path"); then
     :
   else

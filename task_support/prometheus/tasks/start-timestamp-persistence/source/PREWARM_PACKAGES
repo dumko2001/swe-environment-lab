@@ -1,6 +1,0 @@
-./storage/...
-./tsdb/chunkenc
-./tsdb
-./promql/promqltest
-./cmd/prometheus
-./cmd/promtool

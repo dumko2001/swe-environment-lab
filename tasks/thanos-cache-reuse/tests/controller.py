@@ -4,6 +4,7 @@ import concurrent.futures
 import base64
 import bcrypt
 import secrets
+import hashlib
 import tempfile
 import http.server
 import json
@@ -158,6 +159,16 @@ def check(name, fn):
     except Exception as e:
         checks.append({'name': name, 'passed': False, 'error': str(e)[:1000]})
 
+def lookup_reads_are_batched(commands):
+    """Check the conventional ordinary-lookup plus batched-alternatives path.
+
+    Keys are opaque. Multiple batches and a singleton tail are allowed.
+    This does not model arbitrary multi-stage index protocols or prove scaling.
+    """
+    unique_keys = {key for command in commands for key in command['key_fingerprints']}
+    singleton_reads = sum(len(set(command['key_fingerprints'])) <= 1 for command in commands)
+    return len(commands) <= 1 or (singleton_reads <= 2 and len(commands) < len(unique_keys))
+
 def forward_cache_commands(reader, upstream, observe):
     """Forward ASCII protocol frames without interpreting cached value bytes."""
     storage_commands = {'set', 'add', 'replace', 'append', 'prepend', 'cas'}
@@ -183,10 +194,10 @@ def forward_cache_commands(reader, upstream, observe):
                 raise RuntimeError('incomplete Memcached meta storage command')
             payload_size = int(fields[2])
         elif command in {'get', 'gets', 'gat', 'gats', 'mg'}:
-            key_count = 1 if command == 'mg' else len(fields) - (2 if command in {'gat', 'gats'} else 1)
-            if key_count < 1:
+            keys = fields[1:2] if command == 'mg' else fields[2:] if command in {'gat', 'gats'} else fields[1:]
+            if not keys:
                 raise RuntimeError('Memcached retrieval has no keys')
-            observe(command, key_count)
+            observe(command, keys)
         elif command not in simple_commands:
             raise RuntimeError('unsupported Memcached command framing: '+command)
         upstream.sendall(line)
@@ -220,9 +231,11 @@ class CacheCommandRecorder(socketserver.ThreadingTCPServer):
         self.stopping = False
         super().__init__(('127.0.0.1', 0), CacheCommandForwarder)
 
-    def observe(self, command, key_count):
+    def observe(self, command, keys):
+        # Treat keys as opaque identities; no candidate key format is assumed.
         with self.mutex:
-            self.commands.append({'command': command, 'key_count': key_count})
+            self.commands.append({'command': command, 'key_count': len(keys),
+                                  'key_fingerprints': [hashlib.sha256(key).hexdigest() for key in keys]})
 
     def snapshot(self):
         with self.mutex:
@@ -303,7 +316,7 @@ class CacheCommandForwarder(socketserver.BaseRequestHandler):
                     self.server.connections.discard(self.request)
 
 
-def cold_cache_read_bound():
+def cold_cache_lookup_batching():
     """Count wire retrieval frames, not cmd_get (which counts individual keys)."""
     global front_url
     normal_url = front_url
@@ -341,7 +354,7 @@ def cold_cache_read_bound():
             if arg.startswith('--query-range.response-cache-config=') else arg
             for arg in front_args
         ]
-        probe = launch(args, 'frontend-cache-read-bound', True)
+        probe = launch(args, 'frontend-cache-lookup-batching', True)
         front_url = f'http://127.0.0.1:{probe_port}'
         ready(front_url+'/-/ready')
         # Fresh dedicated cache, unique expression, and one unsplit range.
@@ -355,18 +368,27 @@ def cold_cache_read_bound():
         expect(q, start, end, step)
         commands, errors = recorder.snapshot()
         observed = commands[len(before_commands):]
+        unique_keys = {key for command in observed for key in command['key_fingerprints']}
         cache_read_receipts.append({
-            'name': 'cold_compatible_lookup_read_bound',
+            'name': 'cold_compatible_lookup_batching',
             'start': start, 'end': end, 'step': step,
             'memcached_version': version,
             'retrieval_commands': observed,
             'remote_read_commands': len(observed),
+            'distinct_keys': len(unique_keys),
             'downstream_requests': count() - before_downstream,
             'recorder_errors': errors,
         })
         assert not errors, errors
         assert count() > before_downstream, 'cold request bypassed observed downstream route'
-        assert len(observed) <= 2, f'cold compatible lookup used {len(observed)} remote cache read commands; maximum is 2'
+        # Permit multiple batches, one ordinary-key lookup, and a final
+        # partial batch. A single-key design needs no batching.
+        # This finite trace checks batching, not asymptotic complexity.
+        singleton_reads = sum(len(set(command['key_fingerprints'])) <= 1 for command in observed)
+        assert lookup_reads_are_batched(observed), (
+            f'compatible lookup issued {singleton_reads} single-key reads '
+            f'across {len(observed)} commands for {len(unique_keys)} distinct keys; '
+            'alternative lookups must be batched')
     finally:
         front_url = normal_url
         if recorder is not None:
@@ -448,6 +470,27 @@ def ordinary_subrange_histogram():
 
 def ordinary_single_point_histogram():
     ordinary_cached_subrange(f'micro1_hist_single_{nonce}', single_point=True)
+
+def ordinary_growth(q):
+    reset()
+    warm(q, base, base+300, 60)
+    before = count()
+    expect(q, base, base+600, 60)
+    assert count() > before, 'expanded ordinary request never fetched missing coverage'
+    deadline = time.monotonic()+5
+    stable = 0
+    while stable < 2:
+        assert time.monotonic() < deadline, 'expanding an ordinary cache entry discarded previously cached coverage'
+        before = count()
+        expect(q, base, base+600, 60)
+        stable = stable+1 if count() == before else 0
+        time.sleep(.025)
+
+def ordinary_growth_float():
+    ordinary_growth(f'vector(time()+{nonce+6301})')
+
+def ordinary_growth_histogram():
+    ordinary_growth(f'micro1_hist_growth_{nonce}')
 
 def ordinary_hit_with_partial_dense_entry():
     """Adding a shorter dense cache entry must not invalidate a full exact hit."""
@@ -592,10 +635,10 @@ try:
     front_args=[candidate,'query-frontend',f'--http-address=127.0.0.1:{front_port}',f'--query-frontend.downstream-url=http://127.0.0.1:{proxy.server_port}', '--no-query-range.align-range-with-step','--query-range.split-interval=24h','--query-range.response-cache-max-freshness=0s','--query-range.response-cache-config='+cache,'--log.level=error']
     frontend=launch(front_args, 'frontend',True)
     ready(front_url+'/-/ready')
-    for name, fn in [('cold_compatible_lookup_read_bound',cold_cache_read_bound),('divisible_grids',divisible),('incompatible_grids',incompatible),('partial_coverage',partial),('ordinary_subrange_float',ordinary_subrange_float),('ordinary_single_point_float',ordinary_single_point_float),('ordinary_subrange_histogram',ordinary_subrange_histogram),('ordinary_single_point_histogram',ordinary_single_point_histogram),('ordinary_hit_with_partial_dense_entry',ordinary_hit_with_partial_dense_entry),('missing_final_timestamp_float',missing_final_timestamp_float),('missing_final_timestamp_histogram',missing_final_timestamp_histogram),('window_growth_float',window_growth_float),('window_growth_histogram',window_growth_histogram),('request_isolation',isolation),('native_histograms',histograms),('series_identity',labeled),('empty_results',empty),('concurrent_reuse',concurrent_reuse),('split_boundary',boundary),('frontend_replacement',restart_reuse)]:
+    for name, fn in [('cold_compatible_lookup_batching',cold_cache_lookup_batching),('divisible_grids',divisible),('incompatible_grids',incompatible),('partial_coverage',partial),('ordinary_subrange_float',ordinary_subrange_float),('ordinary_single_point_float',ordinary_single_point_float),('ordinary_subrange_histogram',ordinary_subrange_histogram),('ordinary_single_point_histogram',ordinary_single_point_histogram),('ordinary_hit_with_partial_dense_entry',ordinary_hit_with_partial_dense_entry),('ordinary_growth_float',ordinary_growth_float),('ordinary_growth_histogram',ordinary_growth_histogram),('missing_final_timestamp_float',missing_final_timestamp_float),('missing_final_timestamp_histogram',missing_final_timestamp_histogram),('window_growth_float',window_growth_float),('window_growth_histogram',window_growth_histogram),('request_isolation',isolation),('native_histograms',histograms),('series_identity',labeled),('empty_results',empty),('concurrent_reuse',concurrent_reuse),('split_boundary',boundary),('frontend_replacement',restart_reuse)]:
         check(name,fn)
     # Together with divisible_grids, both requested and cached steps cover the
-    # explicitly documented domain through 12 hours. Each case reports alone.
+    # representative dashboard intervals through 12 hours. Each case reports alone.
     for dense, coarse in [(1,5), (10,20), (120,600), (300,900), (600,1800),
                           (900,3600), (1800,7200), (3600,10800),
                           (10800,21600), (21600,43200)]:

@@ -123,3 +123,17 @@ We also use code from a large number of npm packages. For details, see:
 - The licenses of the packages bundled into the old (react-app) web UI, served
   via --enable-feature=old-ui, are extracted at build time into a
   *.LICENSE.txt file that is embedded alongside the old UI's JavaScript bundle.
+
+
+Task source provenance
+
+unix-socket-scraping: prometheus/prometheus @ 92aa2e73df04594bd941dd9b6f073cf27e320820; reference commits c5fa89db085c9b3855d7916f2ade047066a7a318, 05f9eb8b3b8e10b48c8f4153b0714dbe9bc9a630.
+prometheus-subquery-semantics: prometheus/prometheus @ 38c29bc2e26f6fe52d347c6d325552cf68810454; reference commits 68119c094875452839d34d259b7394d0176cb844.
+histogram-rate-semantics: prometheus/prometheus @ cb085a6281e242e4694306901b7931e5801e5387; reference commits 06b569ae2a6e43d08490370e10f0df8c7ba0fb68, 2626a65a8282703f1378e341565922756a4a0f9a.
+start-timestamp-persistence: prometheus/prometheus @ 12be92b1171fb6cabf01ea292939aa17d06b6c09; reference commits abb5a2f9471a7315cbd9562087412340b2825ccb.
+stale-wal-expiry: prometheus/prometheus @ 05d9bd4a2789196c1361acfe06a2edf79440d8c0; reference commits 5ddb7e49e3c89c406687cf020f85e04a3bac16fd.
+thanos-cache-reuse: thanos-io/thanos @ b9f0bd038a7b9e7c8e4f2a3c96957d3e4d7251e4; reference commit bdba693318568b4e25078700983337ec03c7ada4 (backend changes and associated tests).
+victoriametrics-fill-modifiers: VictoriaMetrics/VictoriaMetrics @ 66ac4114edc4871f5cc5f957c26b0332d9f9fd71; reference commit fb26016beb0b708a254f78406712edd2df453c90 (production changes and tests, without changelog).
+
+Archive checksums are retained in each task environment/source directory.
+Upstream licenses and dependency notices remain inside the source archives.

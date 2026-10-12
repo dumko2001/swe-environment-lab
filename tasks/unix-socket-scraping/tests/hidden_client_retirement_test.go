@@ -120,6 +120,12 @@ func TestMicro1UnixSocketClientRetirement(t *testing.T) {
 		sentinel := udsWeakSentinel()
 		retained := udsWeakCollect(retired, scrapers)
 		require.Nil(t, sentinel.Value(), "VERIFIER_RUNTIME_CALIBRATION_ERROR: runtime did not clear an unreferenced ordinary http.Client; do not classify as candidate retention")
+		// Target removal may schedule cleanup after synchronization returns.
+		deadline := time.Now().Add(5 * time.Second)
+		for retained > 0 && time.Now().Before(deadline) {
+			time.Sleep(25 * time.Millisecond)
+			retained = udsWeakCollect(retired, scrapers)
+		}
 		t.Logf("removed_socket_targets=%d retained_inactive_distinct_clients=%d", total, retained)
 		require.Zero(t, retained, "removed targets retained otherwise-unused HTTP client state")
 		udsWeakRequest(t, scrapers["active-a"], "active")

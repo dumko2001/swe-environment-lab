@@ -22,6 +22,12 @@ fi
 rm -rf "$work/prometheus/promql/promqltest"
 cp -R /opt/reference/source/promql/promqltest "$work/prometheus/promql/promqltest"
 cp /tests/hidden_histogram_rate_test.go "$work/prometheus/promql/micro1_hidden_test.go"
+# Assertions and test-only helpers must not resolve through submitted replacements.
+for helper_path in promql/promqltest util/testutil util/teststorage; do
+  rm -rf "$work/prometheus/$helper_path"
+  cp -R "/opt/reference/source/$helper_path" "$work/prometheus/$helper_path"
+done
+/tests/isolate-test-helpers /usr/local/go/bin/go /opt/reference/source "$work/prometheus"
 if ! /tests/common/hardened-run.sh compile "$work/prometheus" promql promql_test "$binary" "$proof" \
   || ! /tests/common/hardened-run.sh compile-program "$work/prometheus" ./cmd/prometheus "$candidate" \
   || ! /tests/common/hardened-run.sh compile-trusted-controller /opt/reference/source /tests/controller.go "$controller"; then

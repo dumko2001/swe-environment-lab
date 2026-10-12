@@ -71,6 +71,8 @@ func main() {
 	// A varying scalar parameter must keep its outer evaluation time, while the
 	// fixed inner population is [0,30,60,90,120]. Linear quantiles equal 120*q.
 	run(`quantile_over_time((time() % 100) / 100, vector(time())[121s:30s] @ 120)`, func(t float64) float64 { return 120 * math.Mod(t, 100) / 100 })
+	// Existing constant-argument behavior must survive the varying-argument fix.
+	run(`quantile_over_time(0.5, vector(time())[121s:30s] @ 120)`, func(float64) float64 { return 60 })
 	// Ordinary subqueries track their outer time; the latest 30-second grid point
 	// in their left-open/right-closed range is the maximum.
 	run(`max_over_time(vector(time())[121s:30s])`, func(t float64) float64 { return math.Floor(t/30) * 30 })

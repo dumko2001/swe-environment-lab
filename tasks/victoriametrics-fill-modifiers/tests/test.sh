@@ -7,7 +7,9 @@ if python3 /tests/prepare.py; then :; else
   printf '0\n' > /logs/verifier/reward.txt
   exit 0
 fi
-if ! (cd /tmp/vm-candidate/victoriametrics && GOWORK=off go build -trimpath -buildvcs=false -o /tmp/micro1-vm ./app/victoria-metrics) > /logs/verifier/build.log 2>&1; then
+workspace=off
+test ! -f /tmp/vm-candidate/victoriametrics/go.work || workspace=/tmp/vm-candidate/victoriametrics/go.work
+if ! (cd /tmp/vm-candidate/victoriametrics && GOENV=off GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS='-p=2' GOWORK="$workspace" go build -trimpath -buildvcs=false -o /tmp/micro1-vm ./app/victoria-metrics) > /logs/verifier/build.log 2>&1; then
   printf '0\n' > /logs/verifier/reward.txt
   printf '%s\n' '{"phase":"build","status":"candidate_build_failed","reward":0}' > /logs/verifier/status.json
   exit 0

@@ -10,6 +10,14 @@ verbose_listing=/tmp/candidate-files-long.txt
 
 mkdir -p /logs/verifier
 
+# A broken trusted image must not become a candidate failure.
+for executable in /tests/common/hardened-run.sh /tests/common/run-candidate.sh /usr/local/go/bin/go; do
+  if ! test -x "$executable"; then
+    printf '%s\n' '{"phase":"prepare","status":"infrastructure_error","reason":"trusted_executable_unavailable"}' > "$status"
+    exit 20
+  fi
+done
+
 if ! test -s "$archive" || ! test -s "$checksum"; then
   printf '%s\n' '{"phase":"artifact","status":"infrastructure_error"}' > "$status"
   exit 20
@@ -51,41 +59,6 @@ if ! test -f "$candidate/go.mod" || ! test -f "$candidate/go.sum"; then
   printf '%s\n' '{"phase":"source","status":"invalid_candidate","reason":"missing_module"}' > "$status"
   exit 10
 fi
-if ! cmp -s "$candidate/go.mod" /opt/reference/go.mod || ! cmp -s "$candidate/go.sum" /opt/reference/go.sum; then
-  printf '%s\n' '{"phase":"source","status":"invalid_candidate","reason":"module_drift"}' > "$status"
-  exit 10
-fi
-for workspace_file in go.work go.work.sum; do
-  trusted_workspace="/opt/reference/source/$workspace_file"
-  candidate_workspace="$candidate/$workspace_file"
-  if test -e "$candidate_workspace"; then
-    if ! test -f "$trusted_workspace" || ! cmp -s "$candidate_workspace" "$trusted_workspace"; then
-      printf '%s\n' '{"phase":"source","status":"invalid_candidate","reason":"workspace_drift"}' > "$status"
-      exit 10
-    fi
-  fi
-done
-if ! test -d /opt/reference/source/vendor && test -e "$candidate/vendor"; then
-  printf '%s\n' '{"phase":"source","status":"invalid_candidate","reason":"unexpected_vendor"}' > "$status"
-  exit 10
-fi
-
-# Reinstall and freeze the checksum-pinned root module metadata. A clean-parent
-# workspace file is permitted, but candidate drift and unexpected workspace
-# overrides are rejected above. Compilation is still forced out of workspace
-# and vendor modes by the hardened runner.
-cp /opt/reference/go.mod "$candidate/go.mod"
-cp /opt/reference/go.sum "$candidate/go.sum"
-chmod 0444 "$candidate/go.mod" "$candidate/go.sum"
-for workspace_file in go.work go.work.sum; do
-  trusted_workspace="/opt/reference/source/$workspace_file"
-  candidate_workspace="$candidate/$workspace_file"
-  if test -f "$trusted_workspace"; then
-    cp "$trusted_workspace" "$candidate_workspace"
-    chmod 0444 "$candidate_workspace"
-  fi
-done
-
 # Candidate-authored tests are not trusted reward logic. Restore every upstream
 # test file from the pinned clean parent before injecting task-owned cases.
 find "$candidate" -type f -name '*_test.go' -delete

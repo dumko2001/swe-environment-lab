@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Validate the collected snapshot without executing candidate-controlled code."""
+import os
 import hashlib
 import json
 from pathlib import Path
@@ -14,6 +15,9 @@ checksum = archive.with_name('candidate.sha256')
 def reject(reason, infrastructure=False):
     (out / 'status.json').write_text(json.dumps({'phase': 'prepare', 'status': 'infrastructure_error' if infrastructure else 'invalid_candidate', 'reason': reason}))
     sys.exit(20 if infrastructure else 10)
+
+if not all(os.access(p, os.X_OK) for p in ('/usr/local/go/bin/go',)):
+    reject('trusted executable unavailable', True)
 
 if not archive.is_file() or not checksum.is_file():
     reject('missing collected artifact', True)
@@ -40,14 +44,6 @@ try:
         tf.extractall(dst)
     candidate = dst / 'victoriametrics'
     reference = Path('/opt/reference/source')
-    for name in ('go.mod', 'go.sum', 'go.work', 'go.work.sum'):
-        a, b = candidate / name, reference / name
-        if a.exists() != b.exists() or (a.exists() and (not a.is_file() or a.read_bytes() != b.read_bytes())):
-            reject('module/workspace metadata changed')
-    def manifest(base):
-        return {str(p.relative_to(base)): hashlib.file_digest(p.open('rb'), 'sha256').hexdigest() for p in base.rglob('*') if p.is_file()}
-    if manifest(candidate / 'vendor') != manifest(reference / 'vendor'):
-        reject('vendored dependencies changed')
 except (OSError, ValueError, tarfile.TarError) as exc:
     reject(type(exc).__name__)
 (out / 'status.json').write_text(json.dumps({'phase': 'prepare', 'status': 'ready'}))

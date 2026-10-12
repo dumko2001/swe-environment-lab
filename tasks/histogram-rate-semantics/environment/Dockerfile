@@ -31,11 +31,8 @@ WORKDIR /app/prometheus
 # module contents, and this layer is reused by every rollout for the task.
 RUN mkdir -p "$GOCACHE" \
     && go mod download \
-    && xargs go test -run '^$' < /opt/prometheus-input/PREWARM_PACKAGES
-
-COPY build/build-candidate.sh /usr/local/bin/build-candidate
-COPY build/diagnose.sh /usr/local/bin/diagnose-environment
-RUN chmod 0555 /usr/local/bin/build-candidate /usr/local/bin/diagnose-environment
+    && xargs go test -run '^$' < /opt/prometheus-input/PREWARM_PACKAGES \
+    && rm -rf /opt/prometheus-input /usr/local/bin/verify-prometheus-source
 
 RUN useradd --create-home --uid 1000 --shell /bin/bash agent \
     && chown -R agent:agent /app/prometheus \
@@ -49,10 +46,8 @@ RUN useradd --create-home --uid 1000 --shell /bin/bash agent \
 # `su root` from an unprivileged image user while preserving the nonroot agent.
 COPY runtime/ /opt/task-runtime/
 RUN mkdir -p /app/task-runtime/bin && GOWORK=off go build -o /app/task-runtime/bin/prometheus ./cmd/prometheus && GOWORK=off go build -o /app/task-runtime/bin/seed /opt/task-runtime/seed.go \
-    && if test -f /opt/task-runtime/storage-demo.go; then GOWORK=off go build -o /app/task-runtime/bin/storage-demo /opt/task-runtime/storage-demo.go; fi \
     && chmod +x /opt/task-runtime/task-env /opt/task-runtime/boot.sh \
     && ln -s /opt/task-runtime/task-env /usr/local/bin/task-env \
-    && ln -s /opt/task-runtime/ENVIRONMENT.md /app/ENVIRONMENT.md \
     && chown -R agent:agent /app/task-runtime /opt/task-runtime
 RUN ln -s /usr/local/go/bin/go /usr/local/bin/go && ln -s /usr/local/go/bin/gofmt /usr/local/bin/gofmt
 USER root

@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Public real Prometheus deployment controls; never used to award rewards."""
+"""Local Prometheus service controls."""
 import fcntl,json,os,pwd,shutil,signal,subprocess,sys,time,urllib.request
 from pathlib import Path
 ROOT=Path('/app/task-runtime'); ASSETS=Path('/opt/task-runtime'); SOURCE=Path('/app/prometheus')
@@ -65,17 +65,9 @@ def start():
         except OSError:time.sleep(.5)
     raise RuntimeError('Prometheus readiness timed out')
 def build():
-    workspace_sum=SOURCE/'go.work.sum'
-    had_workspace_sum=workspace_sum.exists()
-    try:
-      for name,src in [('prometheus','./cmd/prometheus'),('seed',str(ASSETS/'seed.go')),('storage-demo',str(ASSETS/'storage-demo.go'))]:
-          if name=='storage-demo' and not Path(src).exists():continue
-          output=str(ROOT/'bin'/name)+'.new'
-          builder=ASSETS/'build-storage-demo.sh'
-          command=['bash',str(builder),str(SOURCE),output] if name=='storage-demo' and builder.exists() else ['go','build','-o',output,src]
-          subprocess.run(command,cwd=SOURCE,check=True,env={**os.environ,'GOWORK':'off'})
-    finally:
-        if not had_workspace_sum:workspace_sum.unlink(missing_ok=True)
+    for name,src in [('prometheus','./cmd/prometheus'),('seed',str(ASSETS/'seed.go'))]:
+        output=str(ROOT/'bin'/name)+'.new'
+        subprocess.run(['go','build','-o',output,src],cwd=SOURCE,check=True)
     stop()
     for p in (ROOT/'bin').glob('*.new'):os.replace(p,p.with_suffix(''))
     start()
@@ -96,12 +88,7 @@ def main():
             request('/-/ready');print('ready pid='+str(pid('prometheus'))+' profile='+PROFILE);print((ROOT/'seed.json').read_text());print(request('/api/v1/targets').decode())
         elif action=='logs':
             for p in ROOT.glob('*.log'):print(p);subprocess.run(['tail','-n','50',str(p)],check=True)
-        elif action=='storage-demo':
-            tool=ROOT/'bin/storage-demo'
-            if not tool.exists():raise RuntimeError('This profile has no storage driver')
-            dest=sys.argv[2] if len(sys.argv)>2 else str(ROOT/('storage-demo-'+str(time.time_ns())))
-            subprocess.run([str(tool),dest],check=True,cwd=SOURCE)
-        else:print('task-env start|status|logs|stop|restart|rebuild|reset-data|storage-demo [NEW_DIR]')
+        else:print('task-env start|status|logs|stop|restart|rebuild|reset-data')
 if __name__=='__main__':
     try:main()
     except (OSError,RuntimeError,subprocess.CalledProcessError) as e:print(str(e),file=sys.stderr);sys.exit(1)

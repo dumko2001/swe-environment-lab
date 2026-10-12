@@ -5,7 +5,8 @@ import (
 	"math"
 	"testing"
 
-	prom_testutil "github.com/prometheus/client_golang/prometheus/testutil"
+	"github.com/prometheus/client_golang/prometheus"
+	dto "github.com/prometheus/client_model/go"
 	"github.com/stretchr/testify/require"
 
 	"github.com/prometheus/prometheus/model/labels"
@@ -16,6 +17,15 @@ import (
 	"github.com/prometheus/prometheus/tsdb/record"
 	"github.com/prometheus/prometheus/tsdb/wlog"
 )
+
+func micro1CounterValue(t *testing.T, counter prometheus.Counter) float64 {
+	t.Helper()
+	metric := &dto.Metric{}
+	require.NoError(t, counter.Write(metric))
+	require.NotNil(t, metric.Counter)
+	require.NotNil(t, metric.Counter.Value)
+	return *metric.Counter.Value
+}
 
 type micro1WALFixture struct {
 	db          *DB
@@ -103,7 +113,7 @@ func TestMicro1EvictedSeriesRecordSurvivesCheckpointAndReplay(t *testing.T) {
 	require.NoError(t, db.Close())
 	db = newTestDB(t, withDir(dir), withOpts(opts))
 	for _, recordType := range []string{"series", "samples", "exemplars", "histograms", "metadata", "tombstones"} {
-		require.Zero(t, prom_testutil.ToFloat64(db.Head().metrics.walReplayUnknownRefsTotal.WithLabelValues(recordType)), "unknown %s references during replay", recordType)
+		require.Zero(t, micro1CounterValue(t, db.Head().metrics.walReplayUnknownRefsTotal.WithLabelValues(recordType)), "unknown %s references during replay", recordType)
 	}
 	require.NotNil(t, db.Head().series.getByID(chunks.HeadSeriesRef(fixture.activeRef)), "active control series was lost after replay")
 }
@@ -129,7 +139,7 @@ func TestMicro1EvictedSeriesRecordSurvivesAtExactExpiryBoundary(t *testing.T) {
 	require.NoError(t, db.Close())
 	db = newTestDB(t, withDir(dir), withOpts(opts))
 	for _, recordType := range []string{"series", "samples", "exemplars", "histograms", "metadata", "tombstones"} {
-		require.Zero(t, prom_testutil.ToFloat64(db.Head().metrics.walReplayUnknownRefsTotal.WithLabelValues(recordType)), "unknown %s references during replay", recordType)
+		require.Zero(t, micro1CounterValue(t, db.Head().metrics.walReplayUnknownRefsTotal.WithLabelValues(recordType)), "unknown %s references during replay", recordType)
 	}
 	require.NotNil(t, db.Head().series.getByID(chunks.HeadSeriesRef(fixture.activeRef)), "active control series was lost after replay")
 }

@@ -7,7 +7,7 @@ RUN mkdir -p /opt/reference/source \
     && tar -xzf /opt/reference/source.tar.gz -C /opt/reference/source --strip-components=1 \
     && cd /opt/reference/source \
     && go mod download \
-    && go test -run '^$' ./tsdb
+    && go test -run '^$' ./tsdb ./tsdb/wlog
 COPY test.sh hidden_wal_expiry_test.go candidate_program.go trusted_reader.go controller.go /tests/
 COPY common/ /tests/common/
 RUN groupadd --gid 65532 micro1verifier \
@@ -16,3 +16,9 @@ RUN groupadd --gid 65532 micro1verifier \
     && cp /opt/reference/source/go.mod /opt/reference/go.mod \
     && cp /opt/reference/source/go.sum /opt/reference/go.sum \
     && mkdir -p /app/verifier-artifacts /logs/verifier
+
+# Cache the dependency graph selected by the upstream workspace as well.
+RUN cd /opt/reference/source && if test -f go.work; then GOWORK=/opt/reference/source/go.work GOFLAGS='' go mod download all; fi
+
+RUN GOWORK=off GO111MODULE=off GOFLAGS='' GOTOOLCHAIN=local go build -o /tests/isolate-test-helpers /tests/common/isolate-test-helpers.go && chmod 0555 /tests/isolate-test-helpers
+RUN GOWORK=off GO111MODULE=off GOFLAGS='' GOTOOLCHAIN=local go build -o /tests/filter-private-embeds /tests/common/filter-private-embeds.go && chmod 0555 /tests/filter-private-embeds
