@@ -1,5 +1,5 @@
 {
-  "scope": "One fresh attempt per task on the cleaned environments. Thanos initially passed; two additional checks for existing cache behavior exposed a false positive. The unchanged submission was replayed against the corrected grader, and both rewards are preserved below.",
+  "scope": "Two fresh independent attempts per task, using the unchanged audited task package.",
   "model": "gpt-6-luna",
   "reasoning_effort": "high",
   "codex_version": "0.162.1",
@@ -7,81 +7,348 @@
   "daytona_version": "0.223.1",
   "cpus": 4,
   "memory_mb": 8192,
-  "trial_count": 7,
+  "check_count_note": "Check totals are diagnostics, not partial rewards. VictoriaMetrics has 45 case types executed under three seeds, including setup and regression controls. Thanos includes ordinary-cache controls and repeated interval combinations. Passing controls does not establish feature correctness. All task rewards here are binary.",
+  "trial_count": 14,
   "pass_count": 1,
-  "task_package_sha256": "b80cb81ce55905d5cb32c41a7811d6afe7f7fd6c0b944a16201c8d1fc39482d1",
   "reference_passes": 7,
   "unchanged_baseline_failures": 7,
+  "grading_notes": "Original upstream PR patches remain the reference solutions. These runs use the previously corrected graders, including both Thanos cache-growth regression checks. Failures below are grounded in observed behavior or compilation, not patch similarity. Some controllers stop at the first failure; later checks are unproven. Passing this finite suite does not prove absence of all defects.",
   "trajectory_review": {
-    "trajectories": 7,
-    "visible_tool_calls": 383,
-    "finding": "No visible online solution retrieval or private-grader access. Shell downloads remained possible. Test edits were reviewed as repository work, not assumed to be cheating."
+    "trajectories": 14,
+    "visible_tool_calls": 573,
+    "finding": "No visible online solution retrieval or private-grader access in reviewed tool calls. Ordinary repository test updates were inspected rather than treated as cheating. Shell downloads remained possible, so this is an observation, not a guarantee."
+  },
+  "comparisons": {
+    "stale-wal-expiry": {
+      "pattern": "different",
+      "summary": "Attempt 1 passes. Attempt 2 does not compile: tombstone filtering passes storage.SeriesRef where chunks.HeadSeriesRef is required; expiry logic remains unchanged. A cast alone is not established as a full fix."
+    },
+    "unix-socket-scraping": {
+      "pattern": "same",
+      "shared_failures": [
+        "TestMicro1UnixSocketCallerDialOption"
+      ],
+      "summary": "Both override the caller's dial hook with their Unix dialer. Different client cleanup designs otherwise pass the executed routing/lifecycle tests. A specific compatibility miss."
+    },
+    "prometheus-subquery-semantics": {
+      "pattern": "same",
+      "shared_failures": [
+        "standalone computed fixed-time subquery: unexpected number of samples"
+      ],
+      "summary": "Both fix function-argument subqueries but miss the top-level computed expression. One unwraps StepInvariantExpr during evaluation; the other changes preprocessing. Later checks are not reached."
+    },
+    "histogram-rate-semantics": {
+      "pattern": "different",
+      "summary": "Attempt 1 drops the initial zero-valued range sample (four timestamps versus five). Attempt 2 passes that stage but still crashes on bare mixed-type smoothed queries. Both are concrete behavior failures; fail-fast verification leaves later cases unproven."
+    },
+    "victoriametrics-fill-modifiers": {
+      "pattern": "overlapping",
+      "shared_failures": [
+        "different-fill-values",
+        "empty-left",
+        "instant-consistency",
+        "left-fill-order",
+        "missing-left-comparison-name",
+        "nested-aggregation",
+        "nested-fill-set-filter",
+        "symmetric-fill"
+      ],
+      "only_attempt_1": [
+        "empty-right"
+      ],
+      "only_attempt_2": [
+        "infinite-fill-left",
+        "infinite-fill-right",
+        "infinite-observation-not-missing",
+        "metric-name-control",
+        "scalar-control",
+        "scalar-sparse-vector",
+        "sparse-vector-scalar"
+      ],
+      "summary": "36/45 and 30/45 case types pass consistently across three seeds (108/135 and 90/135 executions). Broad missing-series and nested-expression failures overlap; attempt 2 additionally fails scalar/infinity behavior. Counts include regression/setup controls and are not partial reward."
+    },
+    "thanos-cache-reuse": {
+      "pattern": "same_checks_different_causes",
+      "summary": "Both score 14/32 and fail the same 18 checks. Attempt 1 makes no edits. Attempt 2 implements shared-key caching in an internal default, but the active frontend injects a different key generator that still includes step. Its new reuse logic is not exercised across steps.",
+      "shared_failures": [
+        "divisible_grids",
+        "partial_coverage",
+        "native_histograms",
+        "series_identity",
+        "empty_results",
+        "concurrent_reuse",
+        "split_boundary",
+        "frontend_replacement",
+        "domain_steps_1_5",
+        "domain_steps_10_20",
+        "domain_steps_120_600",
+        "domain_steps_300_900",
+        "domain_steps_600_1800",
+        "domain_steps_900_3600",
+        "domain_steps_1800_7200",
+        "domain_steps_3600_10800",
+        "domain_steps_10800_21600",
+        "domain_steps_21600_43200"
+      ]
+    },
+    "start-timestamp-persistence": {
+      "pattern": "same_behavior_incomplete_integration",
+      "shared_failures": [
+        "integer histogram reset/zero-ST durable round trip"
+      ],
+      "summary": "Both lose a nonzero start timestamp (diagnostic replays recover 0 instead of 1098 and 1057). They use different new encodings, but both leave AppenderV2 option wiring incomplete; attempt 2 also omits WAL replay wiring, while attempt 1 leaves a legacy reconstruction path. The failure is lost data, not format conformity. Later cases are unproven."
+    }
   },
   "attempts": [
     {
       "task": "histogram-rate-semantics",
       "attempt": 1,
-      "job": "live-env-guidance-1012-fresh-histogram-rate-semantics-1",
-      "reward": 0,
-      "candidate_archive_sha256": "1bf861412ed6f07161546bb3d7b342347b7903f61dc8a159ee2568bcc69d7553",
-      "finding": "Numerical HTTP comparison cases and range evaluation pass before incompatible exponential/custom histogram schemas omit the repository warning. Later controller checks were not reached, so a small warning fix has not been established as a full pass. Agent added tests and ran focused unit/lint checks.",
-      "visible_tool_calls": 67
+      "job": "luna-2x-1012b-histogram-rate-semantics-1",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-histogram-rate-semantics-1/histogram-rate-semantics__rYvvaB3/result.json",
+      "trajectory": "jobs/luna-2x-1012b-histogram-rate-semantics-1/histogram-rate-semantics__rYvvaB3/agent/trajectory.json",
+      "candidate_archive_sha256": "f48fd1a16b0635b497f9e6dda2cc4ff54d8688021b5a877aad553c9f9058783d",
+      "classification": "range_boundary_sample_omission",
+      "finding": "Range evaluation loses the initial zero-valued sample: histogram returns four timestamps while equivalent float control returns five. Its extendedHistogramRate requires at least two points and drops the single-point boundary case.",
+      "visible_tool_calls": 33,
+      "verifier_results": "jobs/luna-2x-1012b-histogram-rate-semantics-1/histogram-rate-semantics__rYvvaB3/verifier"
+    },
+    {
+      "task": "histogram-rate-semantics",
+      "attempt": 2,
+      "job": "luna-2x-1012b-histogram-rate-semantics-2",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-histogram-rate-semantics-2/histogram-rate-semantics__qPMugvX/result.json",
+      "trajectory": "jobs/luna-2x-1012b-histogram-rate-semantics-2/histogram-rate-semantics__qPMugvX/agent/trajectory.json",
+      "candidate_archive_sha256": "7bd5713fc978bca28caa7714266b4f12f81c99fbbc18e13e3ad3eea3238d8d06",
+      "classification": "mixed_type_crash_not_fixed",
+      "finding": "Numerical HTTP checks and incompatible-schema warning check complete, but bare mixed_types smoothed still panics (index out of range in Engine.execEvalStmt) and HTTP returns EOF. The agent added warning handling in smoothSeries but retained empty series that the top-level instant result path indexes.",
+      "visible_tool_calls": 21,
+      "verifier_results": "jobs/luna-2x-1012b-histogram-rate-semantics-2/histogram-rate-semantics__qPMugvX/verifier"
     },
     {
       "task": "prometheus-subquery-semantics",
       "attempt": 1,
-      "job": "live-env-guidance-1012-fresh-prometheus-subquery-semantics-1",
-      "reward": 0,
-      "candidate_archive_sha256": "13dbd8f9234c4814c9063f6dd43ba9671fa83a90a1a1cfd5e6f4fd03207a7d72",
-      "finding": "Varying and constant argument cases pass before the probe fails on a top-level computed fixed-time subquery with unexpected number of samples. The patch unwraps StepInvariantExpr in function arguments but leaves the top-level result replication assertion. The agent added and ran local tests, but those did not cover this expression shape.",
-      "visible_tool_calls": 62
+      "job": "luna-2x-1012b-prometheus-subquery-semantics-1",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-prometheus-subquery-semantics-1/prometheus-subquery-semantics__7hp5uBJ/result.json",
+      "trajectory": "jobs/luna-2x-1012b-prometheus-subquery-semantics-1/prometheus-subquery-semantics__7hp5uBJ/agent/trajectory.json",
+      "candidate_archive_sha256": "758ef92afee600400efe24c1cf64eaa1e8a813e07905a0e8858fa486fd69c14b",
+      "classification": "standalone_subquery_omission",
+      "finding": "Function-argument cases pass, then standalone computed fixed-time subquery panics with unexpected number of samples. The agent only unwraps StepInvariantExpr when discovering function matrix arguments; added standalone test uses a raw metric rather than computed vector(time()), so it misses the failing expression shape.",
+      "visible_tool_calls": 31,
+      "verifier_results": "jobs/luna-2x-1012b-prometheus-subquery-semantics-1/prometheus-subquery-semantics__7hp5uBJ/verifier"
+    },
+    {
+      "task": "prometheus-subquery-semantics",
+      "attempt": 2,
+      "job": "luna-2x-1012b-prometheus-subquery-semantics-2",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-prometheus-subquery-semantics-2/prometheus-subquery-semantics__FkpMetW/result.json",
+      "trajectory": "jobs/luna-2x-1012b-prometheus-subquery-semantics-2/prometheus-subquery-semantics__FkpMetW/agent/trajectory.json",
+      "candidate_archive_sha256": "5e0dc09ec1616789f46a4527ec7bf578afab85d6844d3be674090d46d6818af7",
+      "classification": "standalone_subquery_omission",
+      "finding": "Same top-level computed fixed-time subquery panic as attempt 1. This implementation changes preprocessing to avoid wrapping subqueries inside function arguments, rather than unwrapping them during evaluation.",
+      "visible_tool_calls": 63,
+      "verifier_results": "jobs/luna-2x-1012b-prometheus-subquery-semantics-2/prometheus-subquery-semantics__FkpMetW/verifier"
     },
     {
       "task": "stale-wal-expiry",
       "attempt": 1,
-      "job": "live-env-guidance-1012-fresh-stale-wal-expiry-1",
-      "reward": 1,
-      "candidate_archive_sha256": "8e13e9749e306f3a9423c4affa03b9c67c05364b57c3b449a9f85e6685191e69",
-      "finding": "Uses the upstream timestamp-expiry correction, plus filtering tombstones for discarded series. All current verifier checks pass. Agent did not add or run tests, so this is not a claim that its patch is better than the PR in every engineering respect.",
-      "visible_tool_calls": 12
+      "job": "luna-2x-1012b-stale-wal-expiry-1",
+      "reward": 1.0,
+      "trial_result": "jobs/luna-2x-1012b-stale-wal-expiry-1/stale-wal-expiry__SABMx55/result.json",
+      "trajectory": "jobs/luna-2x-1012b-stale-wal-expiry-1/stale-wal-expiry__SABMx55/agent/trajectory.json",
+      "candidate_archive_sha256": "e783180183721f675fe315726f5c15e35e80180483f7e623c3ac2c72714b6271",
+      "classification": "pass",
+      "finding": "Uses timestamp maxt instead of WAL segment number for stale-series expiry and also records expiry when deleting a series during WAL replay. All current verifier checks pass.",
+      "visible_tool_calls": 25,
+      "verifier_results": "jobs/luna-2x-1012b-stale-wal-expiry-1/stale-wal-expiry__SABMx55/verifier"
+    },
+    {
+      "task": "stale-wal-expiry",
+      "attempt": 2,
+      "job": "luna-2x-1012b-stale-wal-expiry-2",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-stale-wal-expiry-2/stale-wal-expiry__DWLpx7F/result.json",
+      "trajectory": "jobs/luna-2x-1012b-stale-wal-expiry-2/stale-wal-expiry__DWLpx7F/agent/trajectory.json",
+      "candidate_archive_sha256": "22259c313d6b68cebb95ce6791498fe423ca67a2b7bcb1f32622958127442932",
+      "classification": "candidate_compile_failure",
+      "finding": "The submission passes a storage.SeriesRef directly to keep(), which accepts chunks.HeadSeriesRef, in the tombstone checkpoint loop (checkpoint.go:319). Candidate compilation fails before behavioral tests.",
+      "visible_tool_calls": 13,
+      "verifier_results": "jobs/luna-2x-1012b-stale-wal-expiry-2/stale-wal-expiry__DWLpx7F/verifier"
     },
     {
       "task": "start-timestamp-persistence",
       "attempt": 1,
-      "job": "live-env-guidance-1012-fresh-start-timestamp-persistence-1",
-      "reward": 0,
-      "candidate_archive_sha256": "47b40ff9d7cc78500acca5a8a1445a9d023cf4c09f955bdaeadd0247277df7b2",
-      "finding": "Implements native histogram encoding and local compaction/tests, but both chunkOpts constructors in unchanged tsdb/head_wal.go omit histogramsSTEncoding. The modified append paths therefore clear ST during replay. The verifier already enables st-storage together with the histogram flag and fails full histogram recovery after restart. A wiring repair has not been run through the entire verifier; no claim that this is the only defect.",
-      "visible_tool_calls": 153
+      "job": "luna-2x-1012b-start-timestamp-persistence-1",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-start-timestamp-persistence-1/start-timestamp-persistence__oL49y2Y/result.json",
+      "trajectory": "jobs/luna-2x-1012b-start-timestamp-persistence-1/start-timestamp-persistence__oL49y2Y/agent/trajectory.json",
+      "candidate_archive_sha256": "3e99adf40ec43bd673131cc2da25af6273146d5cbdd06960669a1385e4e489af",
+      "classification": "durable_start_timestamp_loss",
+      "finding": "First integer histogram reset/zero-ST round trip fails after database close, reopen and compaction. Diagnostic replay returns ST=0 where ST=1098 was written.",
+      "failed_checks": [
+        "integer histogram reset/zero-ST durable round trip"
+      ],
+      "visible_tool_calls": 74,
+      "verifier_results": "jobs/luna-2x-1012b-start-timestamp-persistence-1/start-timestamp-persistence__oL49y2Y/verifier"
+    },
+    {
+      "task": "start-timestamp-persistence",
+      "attempt": 2,
+      "job": "luna-2x-1012b-start-timestamp-persistence-2",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-start-timestamp-persistence-2/start-timestamp-persistence__ybyq7VK/result.json",
+      "trajectory": "jobs/luna-2x-1012b-start-timestamp-persistence-2/start-timestamp-persistence__ybyq7VK/agent/trajectory.json",
+      "candidate_archive_sha256": "8190fdaa53a09725969f919af7a784e812a89fe72f78e6f6c7d851237636eafd",
+      "classification": "durable_start_timestamp_loss",
+      "finding": "Same first integer histogram reset/zero-ST durable round trip fails. Diagnostic replay returns ST=0 where ST=1057 was written.",
+      "failed_checks": [
+        "integer histogram reset/zero-ST durable round trip"
+      ],
+      "visible_tool_calls": 132,
+      "verifier_results": "jobs/luna-2x-1012b-start-timestamp-persistence-2/start-timestamp-persistence__ybyq7VK/verifier"
     },
     {
       "task": "thanos-cache-reuse",
       "attempt": 1,
-      "job": "live-env-guidance-1012-fresh-thanos-cache-reuse-1",
-      "reward": 0,
-      "candidate_archive_sha256": "ec488ce47bc7172bd93f2936f16a67f3bd16f12f483c9003202d72686c5c9ac4",
-      "finding": "Initial 30/30 pass omitted an existing cache behavior. After a same-step range expansion, only fresh extents are written under that cache key, discarding earlier coverage and causing repeated backend refetches. The reference passes both added float/histogram expansion checks; the unchanged submitted source fails both (30/32). Final grader includes them. Its batched divisor lookup is a legitimate alternative, but fresh-only extent replacement is a regression.",
-      "visible_tool_calls": 24,
-      "original_reward": 1.0,
-      "verifier_replay_job": "live-env-guidance-1012-growth-fresh-replay"
+      "job": "luna-2x-1012b-thanos-cache-reuse-1",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-thanos-cache-reuse-1/thanos-cache-reuse__zdyAzKN/result.json",
+      "trajectory": "jobs/luna-2x-1012b-thanos-cache-reuse-1/thanos-cache-reuse__zdyAzKN/agent/trajectory.json",
+      "candidate_archive_sha256": "6f88c4a7f48617dcbe4b19fab8e7c863644313fe8ed9ed6851d1d90212e2aa75",
+      "classification": "no_implementation",
+      "finding": "14/32 checks pass. The agent made no edits and explicitly ended with \"I traced the cache path but haven\u2019t made the change.\" Compatible-step reuse, partial reuse, histograms, empty results, concurrency and frontend replacement fail as on the baseline.",
+      "visible_tool_calls": 12,
+      "passed_checks": 14,
+      "total_checks": 32,
+      "verifier_results": "jobs/luna-2x-1012b-thanos-cache-reuse-1/thanos-cache-reuse__zdyAzKN/verifier"
+    },
+    {
+      "task": "thanos-cache-reuse",
+      "attempt": 2,
+      "job": "luna-2x-1012b-thanos-cache-reuse-2",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-thanos-cache-reuse-2/thanos-cache-reuse__pdkbeBa/result.json",
+      "trajectory": "jobs/luna-2x-1012b-thanos-cache-reuse-2/thanos-cache-reuse__pdkbeBa/agent/trajectory.json",
+      "candidate_archive_sha256": "5e01ba54b3d4afb0d0d8d22e153ed49d54a08c9b0656dc248e6f46f84fc074de",
+      "classification": "production_cache_key_integration_omission",
+      "finding": "14/32 pass, with the same 18 failing checks as the unchanged first attempt, but for a different reason: substantial shared-key/step-aware-extent implementation only changes internal constSplitter. The production frontend injects newThanosCacheKeyGenerator(), whose key still contains tr.Step.",
+      "passed_checks": 14,
+      "total_checks": 32,
+      "visible_tool_calls": 36,
+      "verifier_results": "jobs/luna-2x-1012b-thanos-cache-reuse-2/thanos-cache-reuse__pdkbeBa/verifier"
     },
     {
       "task": "unix-socket-scraping",
       "attempt": 1,
-      "job": "live-env-guidance-1012-fresh-unix-socket-scraping-1",
-      "reward": 0,
-      "candidate_archive_sha256": "cf0231139d00121f51ecd6f2b8bb5e2018714be911d17853c9bf152f962763b8",
-      "finding": "Fails caller HTTP dial-option precedence: appends its Unix dialer after caller options, overriding them. Other executed routing, TLS/reload and retention tests did not report failures. A specific compatibility omission, not a wholly missing Unix implementation.",
-      "visible_tool_calls": 53
+      "job": "luna-2x-1012b-unix-socket-scraping-1",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-unix-socket-scraping-1/unix-socket-scraping__osKXSqA/result.json",
+      "trajectory": "jobs/luna-2x-1012b-unix-socket-scraping-1/unix-socket-scraping__osKXSqA/agent/trajectory.json",
+      "candidate_archive_sha256": "9971b91c33a1a1af4c4e20df325cf5ad9e6ff0a795d4de7948fdc471fb066e30",
+      "classification": "caller_dial_option_omission",
+      "finding": "Only reported failure is TestMicro1UnixSocketCallerDialOption: caller hook invocation count is zero. The implementation appends its Unix dialer after existing caller options, replacing their dial hook.",
+      "failed_checks": [
+        "TestMicro1UnixSocketCallerDialOption"
+      ],
+      "visible_tool_calls": 35,
+      "verifier_results": "jobs/luna-2x-1012b-unix-socket-scraping-1/unix-socket-scraping__osKXSqA/verifier"
+    },
+    {
+      "task": "unix-socket-scraping",
+      "attempt": 2,
+      "job": "luna-2x-1012b-unix-socket-scraping-2",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-unix-socket-scraping-2/unix-socket-scraping__CmpF8ba/result.json",
+      "trajectory": "jobs/luna-2x-1012b-unix-socket-scraping-2/unix-socket-scraping__CmpF8ba/agent/trajectory.json",
+      "candidate_archive_sha256": "33923f7f3a1bc73e1924f71877600bb362ec5115378fce830287e26e4f9a28cc",
+      "classification": "caller_dial_option_omission",
+      "finding": "Same sole reported failure as attempt 1: TestMicro1UnixSocketCallerDialOption. Uses per-socket clients with reference counts (attempt 1 scans active sockets for cleanup), but both append the Unix dialer after caller options and overwrite the caller hook.",
+      "failed_checks": [
+        "TestMicro1UnixSocketCallerDialOption"
+      ],
+      "visible_tool_calls": 72,
+      "verifier_results": "jobs/luna-2x-1012b-unix-socket-scraping-2/unix-socket-scraping__CmpF8ba/verifier"
     },
     {
       "task": "victoriametrics-fill-modifiers",
       "attempt": 1,
-      "job": "live-env-guidance-1012-fresh-victoriametrics-fill-modifiers-1",
-      "reward": 0,
-      "candidate_archive_sha256": "b8a1abec77571de6f1ff2acd6049411a41563af5af45af429e79f045ec8e2389",
-      "finding": "90/135 checks pass. Missing whole right-only series, empty-left behavior, scalar broadcasting and metric-name semantics fail; nested aggregate gives 126 instead of 144 for one seeded case. Adds fallback series inside binary_op.go but leaves broader evaluation/matching paths incomplete.",
-      "visible_tool_calls": 12
+      "job": "luna-2x-1012b-victoriametrics-fill-modifiers-1",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-victoriametrics-fill-modifiers-1/victoriametrics-fill-modifiers__7kxcgR7/result.json",
+      "trajectory": "jobs/luna-2x-1012b-victoriametrics-fill-modifiers-1/victoriametrics-fill-modifiers__7kxcgR7/agent/trajectory.json",
+      "candidate_archive_sha256": "e1ad685aa68cbdac6106b4cead0aea5d1aebc40b10329255334f957953c59e75",
+      "classification": "incomplete_fill_semantics",
+      "finding": "108/135 pass; 9 semantic cases fail across three seeds. Adds virtual NaN series during matching, but leaves evaluation/filter propagation incomplete.",
+      "failed_check_families": [
+        "different-fill-values",
+        "empty-left",
+        "empty-right",
+        "instant-consistency",
+        "left-fill-order",
+        "missing-left-comparison-name",
+        "nested-aggregation",
+        "nested-fill-set-filter",
+        "symmetric-fill"
+      ],
+      "passed_checks": 108,
+      "total_checks": 135,
+      "visible_tool_calls": 16,
+      "verifier_results": "jobs/luna-2x-1012b-victoriametrics-fill-modifiers-1/victoriametrics-fill-modifiers__7kxcgR7/verifier"
+    },
+    {
+      "task": "victoriametrics-fill-modifiers",
+      "attempt": 2,
+      "job": "luna-2x-1012b-victoriametrics-fill-modifiers-2",
+      "reward": 0.0,
+      "trial_result": "jobs/luna-2x-1012b-victoriametrics-fill-modifiers-2/victoriametrics-fill-modifiers__sa7Xjkg/result.json",
+      "trajectory": "jobs/luna-2x-1012b-victoriametrics-fill-modifiers-2/victoriametrics-fill-modifiers__sa7Xjkg/agent/trajectory.json",
+      "candidate_archive_sha256": "8e327657c90a4b67cd7ff49d9b586aea5e0e5ea2fdc263d6638c167a3c0a54c4",
+      "classification": "incomplete_fill_semantics",
+      "finding": "90/135 pass; 15 semantic cases fail across three seeds. Adds synthetic filled series before matching but misses evaluation/filter propagation and scalar/infinity/metric-name semantics.",
+      "failed_check_families": [
+        "different-fill-values",
+        "empty-left",
+        "infinite-fill-left",
+        "infinite-fill-right",
+        "infinite-observation-not-missing",
+        "instant-consistency",
+        "left-fill-order",
+        "metric-name-control",
+        "missing-left-comparison-name",
+        "nested-aggregation",
+        "nested-fill-set-filter",
+        "scalar-control",
+        "scalar-sparse-vector",
+        "sparse-vector-scalar",
+        "symmetric-fill"
+      ],
+      "passed_checks": 90,
+      "total_checks": 135,
+      "visible_tool_calls": 10,
+      "verifier_results": "jobs/luna-2x-1012b-victoriametrics-fill-modifiers-2/victoriametrics-fill-modifiers__sa7Xjkg/verifier"
     }
-  ]
+  ],
+  "automated_review": {
+    "tool": "harbor analyze",
+    "requested": 14,
+    "completed_reports": 11,
+    "setup_failures": [
+      {
+        "trial": "analyze-victoriametrics-fill-mod__mUTkRPR",
+        "error": "AgentSetupTimeoutError"
+      },
+      {
+        "trial": "analyze-victoriametrics-fill-mod__FHtuBqb",
+        "error": "NonZeroAgentExitCodeError"
+      },
+      {
+        "trial": "analyze-thanos-cache-reuse__pdkb__j8ZoRGv",
+        "error": "AgentSetupTimeoutError"
+      }
+    ],
+    "note": "All 14 solver trajectories were manually reviewed. Automated reports were checked against source and execution evidence; unsupported proximity judgments and an incorrect parenthesis diagnosis were not adopted. Review setup failures do not change solver outcomes."
+  }
 }
